@@ -1,0 +1,286 @@
+.model-selector {
+  position: relative;
+  z-index: 1000;
+}
+
+.model-selector__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 220px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.model-selector__trigger:hover:not(:disabled) {
+  background: var(--hover-bg, #f9fafb);
+  border-color: var(--border-hover, #9ca3af);
+}
+
+.model-selector__trigger:focus {
+  border-color: var(--accent-color, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.model-selector__trigger--active {
+  border-color: var(--accent-color, #3b82f6);
+  background: var(--bg-primary, #ffffff);
+}
+
+.model-selector--disabled .model-selector__trigger {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-disabled, #f3f4f6);
+}
+
+.model-selector__current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.model-selector__icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.model-selector__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  flex: 1;
+}
+
+.model-selector__name {
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  line-height: 1.2;
+  font-size: 14px;
+}
+
+.model-selector__description {
+  font-size: 12px;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.2;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.model-selector__arrow {
+  flex-shrink: 0;
+  color: var(--text-muted, #9ca3af);
+  transition: transform 0.2s ease;
+  margin-left: 8px;
+}
+
+.model-selector__arrow--rotated {
+  transform: rotate(180deg);
+}
+
+.model-selector__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 220px; /* 🔥 设置固定宽度，与触发器宽度一致 */
+  background: var(--bg-primary, #ffffff);
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-top: 4px;
+  overflow: hidden;
+  z-index: 1001;
+  animation: model-dropdown-appear 0.15s ease-out;
+}
+
+@keyframes model-dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.model-selector__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light, #f3f4f6);
+}
+
+.model-selector__option:last-child {
+  border-bottom: none;
+}
+
+.model-selector__option:hover {
+  background: var(--hover-bg, #f9fafb);
+}
+
+.model-selector__option--selected {
+  background: var(--accent-bg, rgba(59, 130, 246, 0.05));
+}
+
+.model-selector__option--selected:hover {
+  background: var(--accent-bg-hover, rgba(59, 130, 246, 0.08));
+}
+
+.model-selector__option-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.model-selector__option-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.model-selector__option-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.model-selector__option-name {
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  line-height: 1.3;
+  font-size: 14px;
+}
+
+.model-selector__option-description {
+  font-size: 12px;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.model-selector__check {
+  flex-shrink: 0;
+  color: var(--accent-color, #3b82f6);
+  margin-left: 8px;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .model-selector__trigger {
+    background: var(--bg-primary-dark, #1f2937);
+    border-color: var(--border-color-dark, #374151);
+    color: var(--text-primary-dark, #f9fafb);
+  }
+  
+  .model-selector__trigger:hover:not(:disabled) {
+    background: var(--hover-bg-dark, #374151);
+    border-color: var(--border-hover-dark, #4b5563);
+  }
+  
+  .model-selector__dropdown {
+    background: var(--bg-primary-dark, #1f2937);
+    border-color: var(--border-color-dark, #374151);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .model-selector__option {
+    border-color: var(--border-light-dark, #374151);
+  }
+  
+  .model-selector__option:hover {
+    background: var(--hover-bg-dark, #374151);
+  }
+  
+  .model-selector__option--selected {
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  .model-selector__name,
+  .model-selector__option-name {
+    color: var(--text-primary-dark, #f9fafb);
+  }
+  
+  .model-selector__description,
+  .model-selector__option-description {
+    color: var(--text-secondary-dark, #d1d5db);
+  }
+  
+  .model-selector__arrow {
+    color: var(--text-muted-dark, #6b7280);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .model-selector__trigger {
+    min-width: 180px;
+    padding: 6px 10px;
+  }
+  
+  .model-selector__name {
+    font-size: 13px;
+  }
+  
+  .model-selector__description,
+  .model-selector__option-description {
+    font-size: 11px;
+  }
+  
+  .model-selector__option {
+    padding: 10px 12px;
+  }
+  
+  .model-selector__icon,
+  .model-selector__option-icon {
+    font-size: 16px;
+  }
+}
+
+/* 专注模式 - 减少视觉干扰 */
+.model-selector--minimal .model-selector__trigger {
+  border: none;
+  padding: 6px 8px;
+  background: var(--bg-subtle, #f8fafc);
+}
+
+.model-selector--minimal .model-selector__description {
+  display: none;
+}
+
+/* 加载状态 */
+.model-selector--loading .model-selector__trigger {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.model-selector--loading .model-selector__arrow {
+  animation: model-loading-spin 1s linear infinite;
+}
+
+@keyframes model-loading-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

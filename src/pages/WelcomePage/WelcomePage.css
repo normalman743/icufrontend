@@ -1,0 +1,46 @@
+/* Welcome Page Main Styles */
+.welcome-page {
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #1a202c;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Content Area - for tab switching */
+.welcome-content {
+  flex: 1;
+  padding-top: 80px; /* Space for fixed navbar */
+  min-height: calc(100vh - 80px);
+}
+
+/* Global Styles */
+button:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}

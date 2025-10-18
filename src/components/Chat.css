@@ -1,0 +1,2364 @@
+/* 聊天容器 - 全屏布局 */
+.chat-container {
+  height: 100vh;
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 添加平滑过渡动画 */
+  transform: translateX(0); /* 默认位置 */
+}
+
+/* 侧边栏折叠时的聊天容器偏移 - 更好的解决方案 */
+.chat-container--sidebar-collapsed {
+  transform: translateX(-110px);
+}
+
+/* 为折叠状态下的内容区域添加左侧padding */
+.chat-container--sidebar-collapsed .chat-main {
+  padding-left: 110px;
+}
+
+.chat-container--sidebar-collapsed .chat-input-fixed {
+  padding-left: calc(32px + 110px); /* 原有padding + 偏移补偿 */
+}
+
+/* 主聊天区域 - 自动撑满屏幕 */
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 确保内容区域也有平滑过渡 */
+}
+
+/* 无消息时的欢迎界面 - 放大尺寸 */
+.chat-welcome-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  gap: 20px; /* 增加间距 */
+  max-width: 800px; /* 增加最大宽度 */
+  margin: 0 auto;
+}
+
+.chat-welcome__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px; /* 增加logo内部间距 */
+  font-size: 24px; /* 增大字体 */
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chat-welcome__logo-image {
+  width: 32px; /* 增大logo */
+  height: 32px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.chat-welcome__logo-text {
+  background: linear-gradient(135deg, var(--accent-color), #1a73e8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.chat-welcome__greeting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px; /* 增加间距 */
+  text-align: center;
+}
+
+.chat-welcome__main-greeting {
+  font-size: 20px; /* 增大主要问候语 */
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.chat-welcome__random-greeting {
+  font-size: 16px; /* 增大随机问候语 */
+  color: var(--text-secondary);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* 聊天记录区域 - 增大整体尺寸 */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px; /* 增加padding */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 增加消息间距 */
+  max-width: 800px; /* 增加最大宽度 */
+  margin: 0 auto;
+  width: 100%;
+  
+  /* 隐藏滚动条但保持滚动功能 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chat-messages::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-message {
+  display: flex;
+  gap: 16px; /* 增加头像和内容间距 */
+  padding: 12px 0; /* 增加上下padding */
+  background: transparent;
+}
+
+.chat-message-text {
+  font-size: 16px; /* 增大消息字体 */
+  line-height: 1.6; /* 增加行高 */
+  color: var(--text-primary);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.chat-message-time {
+  font-size: 12px; /* 稍微增大时间字体 */
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* 聊天消息头像样式 - 增大头像 */
+.chat-message-avatar {
+  width: 40px; /* 增大头像 */
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.chat-message-avatar-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 用户消息和AI消息的对齐 */
+.chat-message--user {
+  flex-direction: row-reverse;
+  text-align: right;
+  justify-content: flex-start;
+}
+
+.chat-message--assistant {
+  flex-direction: row;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.chat-message-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* 增加内容间距 */
+  min-width: 0;
+  max-width: 75%; /* 稍微减小最大宽度，给头像更多空间 */
+}
+
+/* 输入区域 - 增大尺寸 */
+.chat-input-fixed {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  padding: 24px 32px; /* 增加padding */
+  z-index: 10;
+}
+
+.chat-input-container {
+  max-width: 800px; /* 增加最大宽度 */
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 输入框容器 - 增大尺寸 */
+.chat-input-wrapper {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 28px; /* 增大圆角 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 56px; /* 增大高度 */
+  max-height: 140px; /* 增大最大高度 */
+}
+
+.chat-input-wrapper:focus-within {
+  border-color: var(--accent-color);
+  box-shadow: 0 2px 6px var(--accent-shadow);
+}
+
+/* 文件上传按钮 - 增大尺寸 */
+.chat-upload-button {
+  position: absolute;
+  left: 16px; /* 增加左边距 */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px; /* 增大按钮 */
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: var(--text-muted);
+  z-index: 1;
+}
+
+.chat-upload-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.chat-upload-icon {
+  font-size: 16px; /* 增大图标 */
+}
+
+/* 输入框 - 增大字体和padding */
+.chat-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px; /* 增大字体 */
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: transparent;
+  resize: none;
+  font-family: inherit;
+  min-height: 24px; /* 增加最小高度 */
+  max-height: 120px; /* 增加最大高度 */
+  padding: 16px 100px 16px 52px; /* 🔥 增加右侧padding为随机按钮和发送按钮腾出空间 */
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chat-input::placeholder {
+  color: var(--text-muted);
+  font-size: 16px; /* 增大占位符字体 */
+}
+
+/* 发送按钮 - 增大尺寸 */
+.chat-send-button {
+  position: absolute;
+  right: 16px; /* 增加右边距 */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px; /* 增大按钮 */
+  height: 28px;
+  background: var(--accent-color);
+  border: none;
+  border-radius: 14px; /* 调整圆角 */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.chat-send-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-50%)
+}
+
+.chat-send-button:disabled {
+  background: var(--border-color);
+  cursor: not-allowed;
+  transform: translateY(-50%);
+}
+
+.chat-send-icon {
+  font-size: 14px; /* 增大图标 */
+  color: white;
+  font-weight: bold;
+}
+
+/* 隐藏的文件输入 */
+.chat-file-input {
+  display: none;
+}
+
+/* 移除输入提示，因为现在是全宽布局 */
+.chat-input-hint {
+  display: none;
+}
+
+/* 拖拽激活状态 */
+.chat-container--drag-active {
+  position: relative;
+}
+
+/* 拖拽覆盖层 */
+.chat-drag-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(16, 163, 127, 0.1);
+  border: 2px dashed #10a37f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.chat-drag-content {
+  text-align: center;
+  padding: 48px; /* 增大padding */
+  background: white;
+  border-radius: 20px; /* 增大圆角 */
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+}
+
+.chat-drag-icon {
+  font-size: 56px; /* 增大图标 */
+  margin-bottom: 20px; /* 增加间距 */
+}
+
+.chat-drag-text {
+  font-size: 20px; /* 增大字体 */
+  color: #10a37f;
+  font-weight: 600;
+}
+
+/* 文件上传确认弹窗 - 增大整体尺寸 */
+.chat-upload-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.chat-upload-modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  min-width: 480px;
+  max-width: 560px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+}
+
+.chat-upload-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.chat-upload-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #343541;
+}
+
+.chat-upload-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #8e8ea0;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.chat-upload-modal-close:hover {
+  background: #f1f1f4;
+  color: #565869;
+}
+
+.chat-upload-file-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: #f7f7f8;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.chat-upload-file-icon {
+  font-size: 40px;
+  flex-shrink: 0;
+}
+
+.chat-upload-file-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-upload-file-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #343541;
+  /* 🔥 新增：文件名长度限制和省略号 */
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 6px;
+}
+
+.chat-upload-file-size {
+  font-size: 14px;
+  color: #8e8ea0;
+}
+
+.chat-upload-modal-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+.chat-upload-cancel-button {
+  padding: 12px 20px;
+  border: 1px solid #d9d9e3;
+  background: white;
+  color: #565869;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.chat-upload-cancel-button:hover {
+  background: #f1f1f4;
+  border-color: #c1c1c1;
+}
+
+.chat-upload-confirm-button {
+  padding: 12px 20px;
+  border: none;
+  background: #10a37f;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.chat-upload-confirm-button:hover {
+  background: #0d9268;
+}
+
+/* 🔥 优化：已上传文件显示区域 */
+.chat-uploaded-files {
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding: 0 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chat-uploaded-files::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-uploaded-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  /* 🔥 新增：固定最小宽度，防止文件卡片过小 */
+  min-width: 200px;
+  max-width: 280px;
+  flex-shrink: 0;
+}
+
+.chat-uploaded-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-uploaded-file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  /* 🔥 优化：文件名长度限制和省略号 */
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.chat-uploaded-file-size {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+/* 🔥 优化：聊天消息中的文件附件显示 */
+.chat-message-attachments {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chat-message-attachment {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(16, 163, 127, 0.1);
+  border: 1px solid rgba(16, 163, 127, 0.2);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #065f46;
+  /* 🔥 新增：文件附件容器的最大宽度 */
+  max-width: 200px;
+  min-width: 120px;
+}
+
+.chat-message-attachment-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.chat-message-attachment-name {
+  /* 🔥 新增：消息中文件名的省略号处理 */
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+/* 文件状态样式 */
+.file-status {
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.file-status--processing {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.file-status--completed {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.file-status--failed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* 上传进度样式 */
+.upload-progress {
+  margin-left: 8px;
+  color: #3b82f6;
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* 文件操作按钮样式 */
+.chat-uploaded-file-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chat-uploaded-file-preview {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: #6b7280;
+}
+
+.chat-uploaded-file-preview:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #374151;
+}
+
+.chat-uploaded-file-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #ef4444;
+  transition: background-color 0.2s;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.chat-uploaded-file-remove:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+/* 🔥 新增：文件图标统一样式 */
+.chat-uploaded-file-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+/* 🔥 优化：文件上传进度显示 */
+.chat-file-uploading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  min-width: 200px;
+  max-width: 280px;
+  flex-shrink: 0;
+}
+
+.chat-file-uploading .chat-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.chat-file-upload-progress {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chat-file-upload-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #e0f2fe;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.chat-file-upload-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0ea5e9, #06b6d4);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  animation: chat-progress-shimmer 2s infinite;
+}
+
+.chat-file-upload-progress .chat-loading-text {
+  font-size: 12px;
+  color: #0369a1;
+  font-weight: 500;
+  /* 🔥 新增：进度文本也需要省略号处理 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 响应式设计 - 移动端优化 */
+@media (max-width: 768px) {
+  .chat-uploaded-files {
+    padding: 0 12px;
+    gap: 6px;
+  }
+  
+  .chat-uploaded-file {
+    min-width: 160px;
+    max-width: 220px;
+    padding: 6px 10px;
+  }
+  
+  .chat-uploaded-file-name {
+    font-size: 13px;
+    max-width: 120px;
+  }
+  
+  .chat-uploaded-file-size {
+    font-size: 11px;
+  }
+  
+  .chat-upload-modal-content {
+    min-width: auto;
+    width: 90%;
+    max-width: 400px;
+    margin: 0 20px;
+    padding: 24px;
+  }
+  
+  .chat-upload-file-name {
+    max-width: 250px;
+    font-size: 15px;
+  }
+  
+  .chat-message-attachment {
+    max-width: 160px;
+    min-width: 100px;
+  }
+  
+  .chat-message-attachment-name {
+    max-width: 100px;
+  }
+}
+
+/* 🔥 新增：深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .chat-uploaded-file {
+    background: #374151;
+    color: #f3f4f6;
+  }
+  
+  .chat-uploaded-file-name {
+    color: #f9fafb;
+  }
+  
+  .chat-uploaded-file-size {
+    color: #9ca3af;
+  }
+  
+  .chat_upload_modal_content {
+    background: #1f2937;
+    color: #f3f4f6;
+  }
+  
+  .chat-upload-file-info {
+    background: #374151;
+  }
+  
+  .chat-upload-file-name {
+    color: #f9fafb;
+  }
+  
+  .chat-upload-file-size {
+    color: #9ca3af;
+  }
+}
+
+/* 🔥 新增：文件名tooltip支持 */
+.chat-uploaded-file-name[title],
+.chat-upload-file-name[title],
+.chat-message-attachment-name[title] {
+  cursor: help;
+}
+
+/* 🔥 新增：文件卡片悬停效果 */
+.chat-uploaded-file:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.chat-message-attachment:hover {
+  background: rgba(16, 163, 127, 0.15);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* 修复现有的文件上传样式 */
+.chat-uploaded-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.chat-uploaded-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-uploaded-file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-uploaded-file-size {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+}
+
+/* 移动端响应式调整 */
+@media (max-width: 768px) {
+  .chat-uploaded-files {
+    padding: 0 12px;
+    gap: 6px;
+  }
+  
+  .chat-uploaded-file {
+    min-width: 180px;
+    max-width: 240px;
+    padding: 6px 10px;
+  }
+  
+  .chat-uploaded-file-icon {
+    font-size: 18px;
+  }
+  
+  .chat-uploaded-file-name {
+    font-size: 13px;
+  }
+  
+  .chat-uploaded-file-size {
+    font-size: 11px;
+  }
+}
+
+/* 同时也可以隐藏聊天消息区域的滚动条（如果需要的话） */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px; /* 增加padding */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 增加消息间距 */
+  max-width: 800px; /* 增加最大宽度 */
+  margin: 0 auto;
+  width: 100%;
+  
+  /* 隐藏滚动条 - 可选，如果您也想隐藏聊天消息的滚动条 */
+  /* scrollbar-width: none; */
+  /* -ms-overflow-style: none; */
+}
+
+/* 如果要隐藏聊天消息滚动条，取消注释下面的代码 */
+/*
+.chat-messages::-webkit-scrollbar {
+  display: none;
+}
+*/
+
+/* 同样地，也可以隐藏输入框的滚动条 */
+.chat-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px; /* 增大字体 */
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: transparent;
+  resize: none;
+  font-family: inherit;
+  min-height: 24px; /* 增加最小高度 */
+  max-height: 120px; /* 增加最大高度 */
+  padding: 16px 60px 16px 52px; /* 增大padding */
+  overflow-y: auto;
+  
+  /* 隐藏输入框滚动条 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chat-input::-webkit-scrollbar {
+  display: none;
+}
+
+/* 响应式设计 - 文件上传弹窗 */
+@media (max-width: 768px) {
+  .chat-welcome__upload-modal-content {
+    min-width: auto;
+    width: 90%;
+    max-width: 480px; /* 增大移动端最大宽度 */
+    margin: 0 20px;
+  }
+  
+  .chat-welcome__drag-content {
+    padding: 36px 24px; /* 增大移动端padding */
+    margin: 0 20px;
+  }
+  
+  .chat-welcome__drag-icon {
+    font-size: 48px; /* 增大移动端图标 */
+  }
+  
+  .chat-welcome__drag-text {
+    font-size: 18px; /* 增大移动端字体 */
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .chat-welcome-center {
+    padding: 20px; /* 增加移动端padding */
+    gap: 16px; /* 增加间距 */
+  }
+  
+  .chat-welcome__logo {
+    font-size: 22px; /* 增大移动端logo字体 */
+    gap: 10px;
+  }
+  
+  .chat-welcome__logo-image {
+    width: 30px; /* 增大移动端logo */
+    height: 30px;
+  }
+  
+  .chat-welcome__main-greeting {
+    font-size: 18px; /* 增大移动端主要问候语 */
+  }
+  
+  .chat-welcome__random-greeting {
+    font-size: 15px; /* 增大移动端随机问候语 */
+  }
+  
+  .chat-messages {
+    padding: 16px 20px; /* 增加移动端消息区padding */
+    gap: 16px; /* 增加消息间距 */
+  }
+  
+  .chat-message-text {
+    font-size: 15px; /* 增大移动端消息字体 */
+  }
+  
+  .chat-message-avatar {
+    width: 36px; /* 增大移动端头像 */
+    height: 36px;
+  }
+  
+  .chat-input-fixed {
+    padding: 16px 20px; /* 增加移动端输入区padding */
+  }
+  
+  .chat-input-wrapper {
+    height: 52px; /* 增大移动端输入框高度 */
+    border-radius: 26px;
+  }
+  
+  .chat-input {
+    padding: 14px 56px 14px 48px; /* 增大移动端输入框padding */
+    font-size: 16px; /* 保持16px防止iOS缩放 */
+  }
+  
+  .chat-upload-button,
+  .chat-send-button {
+    width: 26px; /* 增大移动端按钮 */
+    height: 26px;
+  }
+  
+  .chat-upload-button {
+    left: 13px;
+  }
+  
+  .chat-send-button {
+    right: 13px;
+    border-radius: 13px;
+  }
+  
+  .chat-upload-icon {
+    font-size: 14px;
+  }
+  
+  .chat-send-icon {
+    font-size: 12px;
+  }
+}
+
+/* 移动端不需要偏移，因为侧边栏是覆盖模式 */
+@media (max-width: 768px) {
+  .chat-container--sidebar-collapsed {
+    transform: translateX(0); /* 移动端保持原位 */
+  }
+}
+
+/* 自定义滚动指示器 - 固定在屏幕右侧 */
+.chat-scroll-indicator {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100vh;
+  background: rgba(243, 244, 246, 0.5);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.chat-scroll-thumb {
+  position: absolute;
+  right: 0;
+  width: 8px;
+  background: #d1d5db;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  min-height: 20px;
+}
+
+.chat-scroll-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 优化的自定义滚动指示器 - 更流畅的动画 */
+.chat-scroll-indicator {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 6px; /* 稍微减小宽度 */
+  height: 100vh;
+  background: rgba(243, 244, 246, 0.3);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chat-scroll-indicator--active {
+  opacity: 1;
+}
+
+.chat-scroll-thumb {
+  position: fixed;
+  right: 0;
+  width: 6px; /* 与指示器保持一致 */
+  background: #d1d5db;
+  border-radius: 3px;
+  min-height: 30px; /* 设置最小高度 */
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(0) !important; /* 确保不受父元素影响 */
+  
+  /* 更流畅的过渡动画 */
+  transition: 
+    top 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    height 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s ease;
+  
+  /* 使用 will-change 优化性能 */
+  will-change: top, height, opacity;
+}
+
+.chat-scroll-thumb--active {
+  opacity: 0.8;
+}
+
+.chat-scroll-thumb:hover {
+  background: #9ca3af;
+  opacity: 1 !important;
+  width: 8px; /* 悬停时稍微变宽 */
+}
+
+/* 为滚动指示器添加渐入渐出效果 */
+@keyframes scrollIndicatorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scrollIndicatorFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+
+/* 增强滚动性能 */
+.chat-messages {
+  /* ...existing styles... */
+  
+  /* 启用硬件加速 */
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+  
+  /* 优化滚动性能 */
+  contain: layout style paint;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .chat-scroll-indicator,
+  .chat-scroll-thumb {
+    width: 4px; /* 移动端更细 */
+  }
+  
+  .chat-scroll-thumb {
+    border-radius: 2px;
+    min-height: 25px;
+  }
+  
+  .chat-scroll-thumb:hover {
+    width: 4px; /* 移动端不变宽 */
+  }
+}
+
+/* 高分辨率屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .chat-scroll-thumb {
+    /* 在高分辨率屏幕上保持清晰 */
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+/* 加载动画 - 转圈圈 */
+.chat-message-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--accent-color);
+  border-radius: 50%;
+  animation: chat-spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+.chat-loading-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-style: italic;
+}
+
+@keyframes chat-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 打字动画 - 更优雅的版本 */
+.chat-typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--bg-primary);
+  border-radius: 18px;
+  border: 1px solid var(--border-color);
+  margin: 4px 0;
+}
+
+.chat-typing-indicator span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: chat-typing 1.4s ease-in-out infinite both;
+}
+
+.chat-typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.chat-typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.chat-typing-indicator span:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes chat-typing {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 全屏加载覆盖层 */
+.chat-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  gap: 16px;
+}
+
+.chat-loading-overlay .chat-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+}
+
+.chat-loading-overlay .chat-loading-text {
+  font-size: 16px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* 消息发送加载状态 */
+.chat-input-wrapper--loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.chat-input-wrapper--loading .chat-send-button {
+  background: var(--border-color);
+  cursor: not-allowed;
+}
+
+.chat-input-wrapper--loading .chat-send-icon {
+  display: none;
+}
+
+.chat-send-button--loading::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border: 2px solid white;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: chat-spin 0.8s linear infinite;
+}
+
+/* 小型加载动画 - 用于按钮等小空间 */
+.chat-loading-mini {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--border-color);
+  border-top: 1.5px solid var(--accent-color);
+  border-radius: 50%;
+  animation: chat-spin 0.8s linear infinite;
+}
+
+/* 文件上传加载动画 */
+.chat-file-uploading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.chat-file-uploading .chat-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.chat-file-upload-progress {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chat-file-upload-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #e0f2fe;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.chat-file-upload-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0ea5e9, #06b6d4);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  animation: chat-progress-shimmer 2s infinite;
+}
+
+@keyframes chat-progress-shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .chat-loading-overlay {
+    background: rgba(0, 0, 0, 0.8);
+  }
+  
+  .chat-typing-indicator {
+    background: var(--bg-tertiary);
+  }
+  
+  .chat-file-uploading {
+    background: rgba(14, 165, 233, 0.1);
+    border-color: rgba(14, 165, 233, 0.3);
+  }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .chat-loading-overlay .chat-loading-spinner {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .chat-loading-overlay .chat-loading-text {
+    font-size: 14px;
+  }
+  
+  .chat-typing-indicator {
+    padding: 10px 14px;
+  }
+  
+  .chat-typing-indicator span {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* 创建聊天时的加载界面 */
+.chat-creating-chat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  text-align: center;
+  animation: chat-fade-in 0.5s ease-in-out;
+}
+
+.chat-creating-chat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-creating-chat-primary {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chat-creating-chat-secondary {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* 大型加载动画 */
+.chat-loading-spinner--large {
+  width: 48px;
+  height: 48px;
+  border-width: 4px;
+}
+
+/* 渐入动画 */
+@keyframes chat-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 创建聊天时的脉冲动画效果 */
+.chat-creating-chat .chat-loading-spinner--large {
+  animation: chat-spin 1s linear infinite, chat-pulse 2s ease-in-out infinite;
+}
+
+@keyframes chat-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* 输入框在创建聊天时的样式 */
+.chat-input-wrapper--creating {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+  opacity: 0.6;
+}
+
+.chat-input-wrapper--creating .chat-input {
+  color: var(--text-muted);
+}
+
+.chat-input-wrapper--creating .chat-upload-button,
+.chat-input-wrapper--creating .chat-send-button {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 创建聊天时的欢迎界面变化 */
+.chat-welcome-center.creating-chat {
+  animation: chat-welcome-fade-out 0.3s ease-in-out forwards;
+}
+
+@keyframes chat-welcome-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* 创建聊天完成后的渐入效果 */
+.chat-messages.chat-messages--new {
+  animation: chat-messages-fade-in 0.5s ease-in-out;
+}
+
+@keyframes chat-messages-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 移动端响应式调整 */
+@media (max-width: 768px) {
+  .chat-creating-chat {
+    gap: 20px;
+    padding: 0 20px;
+  }
+  
+  .chat-creating-chat-primary {
+    font-size: 18px;
+  }
+  
+  .chat-creating-chat-secondary {
+    font-size: 14px;
+  }
+  
+  .chat-loading-spinner--large {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .chat-creating-chat-primary {
+    color: var(--text-primary-dark);
+  }
+  
+  .chat-creating-chat-secondary {
+    color: var(--text-secondary-dark);
+  }
+  
+  .chat-input-wrapper--creating {
+    background: var(--bg-tertiary-dark);
+    border-color: var(--border-color-dark);
+  }
+}
+
+/* 加载状态的微交互动画 */
+.chat-loading-spinner {
+  /* ...existing styles... */
+  transition: all 0.3s ease;
+}
+
+.chat-loading-spinner:hover {
+  animation-duration: 0.8s; /* 悬停时加速旋转 */
+}
+
+/* 为全屏加载覆盖层添加更好的视觉效果 */
+.chat-loading-overlay {
+  /* ...existing styles... */
+  animation: chat-overlay-fade-in 0.3s ease-in-out;
+}
+
+@keyframes chat-overlay-fade-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* 创建聊天时的特殊背景效果 */
+.chat-container.creating-chat {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+}
+
+/* 加载文本的打字机效果 */
+.chat-loading-text.typing {
+  overflow: hidden;
+  border-right: 2px solid var(--accent-color);
+  white-space: nowrap;
+  animation: chat-typing-cursor 1s infinite step-end;
+}
+
+@keyframes chat-typing-cursor {
+  from, to { border-color: transparent; }
+  50% { border-color: var(--accent-color); }
+}
+
+/* 🔥 新增：聊天加载页面样式 - 添加到Chat.css文件末尾 */
+.chat-loading-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chat-loading-page--sidebar-collapsed {
+  margin-left: 60px;
+}
+
+.chat-loading-page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  z-index: 2;
+  animation: chat-loading-fade-in 0.8s ease-out;
+}
+
+.chat-loading-page-animation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* 🔥 超大加载动画 */
+.chat-loading-spinner--extra-large {
+  width: 64px;
+  height: 64px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #10b981;
+  border-radius: 50%;
+  animation: chat-loading-spin 1.2s linear infinite;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.2);
+}
+
+/* 🔥 点点动画 */
+.chat-loading-page-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.chat-loading-page-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: chat-loading-dots 1.4s ease-in-out infinite both;
+}
+
+.chat-loading-page-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.chat-loading-page-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.chat-loading-page-dots span:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes chat-loading-dots {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* 🔥 文本区域 */
+.chat-loading-page-text {
+  text-align: center;
+  max-width: 400px;
+}
+
+.chat-loading-page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+  animation: chat-loading-text-pulse 2s ease-in-out infinite;
+}
+
+.chat-loading-page-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 16px;
+  line-height: 1.5;
+  min-height: 24px; /* 防止文本变化时高度跳动 */
+  animation: chat-loading-text-fade 0.5s ease-in-out;
+}
+
+.chat-loading-page-chat-id {
+  font-size: 12px;
+  color: #9ca3af;
+  font-family: 'Monaco', 'Menlo', monospace;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+@keyframes chat-loading-text-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes chat-loading-text-fade {
+  0% {
+    opacity: 0.7;
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 🔥 装饰动画 */
+.chat-loading-page-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.chat-loading-decoration-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+  animation: chat-loading-float 6s ease-in-out infinite;
+}
+
+.chat-loading-decoration-circle--1 {
+  width: 120px;
+  height: 120px;
+  top: 20%;
+  right: 10%;
+  animation-delay: 0s;
+}
+
+.chat-loading-decoration-circle--2 {
+  width: 80px;
+  height: 80px;
+  bottom: 30%;
+  left: 15%;
+  animation-delay: 2s;
+}
+
+.chat-loading-decoration-circle--3 {
+  width: 60px;
+  height: 60px;
+  top: 60%;
+  right: 25%;
+  animation-delay: 4s;
+}
+
+.chat-loading-decoration-line {
+  position: absolute;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+  animation: chat-loading-line-move 8s ease-in-out infinite;
+}
+
+.chat-loading-decoration-line--1 {
+  width: 200px;
+  height: 2px;
+  top: 25%;
+  left: -100px;
+  animation-delay: 1s;
+}
+
+.chat-loading-decoration-line--2 {
+  width: 150px;
+  height: 1px;
+  bottom: 20%;
+  right: -75px;
+  animation-delay: 3s;
+}
+
+@keyframes chat-loading-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+  }
+}
+
+@keyframes chat-loading-line-move {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+}
+
+@keyframes chat-loading-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes chat-loading-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 🔥 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .chat-loading-page {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  }
+  
+  .chat-loading-page-title {
+    color: #f9fafb;
+  }
+  
+  .chat-loading-page-subtitle {
+    color: #d1d5db;
+  }
+  
+  .chat-loading-page-chat-id {
+    color: #9ca3af;
+    background: rgba(16, 185, 129, 0.2);
+  }
+  
+  .chat-loading-spinner--extra-large {
+    border-color: #374151;
+    border-top-color: #10b981;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+  }
+  
+  .chat-loading-decoration-circle {
+    background: linear-gradient(45deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+  }
+  
+  .chat-loading-decoration-line {
+    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.3), transparent);
+  }
+}
+
+/* 🔥 移动端优化 */
+@media (max-width: 768px) {
+  .chat-loading-page-content {
+    gap: 24px;
+    padding: 0 20px;
+  }
+  
+  .chat-loading-spinner--extra-large {
+    width: 48px;
+    height: 48px;
+    border-width: 3px;
+  }
+  
+  .chat-loading-page-title {
+    font-size: 20px;
+  }
+  
+  .chat-loading-page-subtitle {
+    font-size: 14px;
+  }
+  
+  .chat-loading-decoration-circle--1 {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .chat-loading-decoration-circle--2 {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .chat-loading-decoration-circle--3 {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .chat-loading-page--sidebar-collapsed {
+    margin-left: 0;
+  }
+}
+
+/* 🔥 减少动画模式 */
+@media (prefers-reduced-motion: reduce) {
+  .chat-loading-page-content,
+  .chat-loading-decoration-circle,
+  .chat-loading-decoration-line {
+    animation: none;
+  }
+  
+  .chat-loading-spinner--extra-large {
+    animation: none;
+    border: 4px solid #10b981;
+    border-radius: 50%;
+  }
+  
+  .chat-loading-page-dots span {
+    animation: none;
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  .chat-loading-page-title {
+    animation: none;
+  }
+}
+
+/* 🔥 高对比度模式 */
+@media (prefers-contrast: high) {
+  .chat-loading-spinner--extra-large {
+    border-width: 6px;
+    box-shadow: none;
+  }
+  
+  .chat-loading-page-title {
+    font-weight: 700;
+  }
+  
+  .chat-loading-page-chat-id {
+    border: 1px solid #10b981;
+  }
+}
+
+/* 搜索开关按钮 */
+.search-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: #666;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-toggle-btn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.search-toggle-btn.active {
+  background: #007bff;
+  color: white;
+}
+
+.search-toggle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 确认对话框 */
+.confirm-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirm-dialog {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.confirm-dialog-content h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.confirm-dialog-content p {
+  margin: 0 0 20px 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.confirm-dialog-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.cancel-btn:hover {
+  background: #e9e9e9;
+}
+
+.confirm-btn {
+  background: #007bff;
+  color: white;
+}
+
+.confirm-btn:hover {
+  background: #0056b3;
+}
+
+/* 输入按钮组布局 */
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 🔥 新增：深度搜索状态指示器 */
+.search-status-indicator {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  animation: search-status-fade-in 0.3s ease-out;
+  z-index: 10;
+}
+
+.search-status-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+@keyframes search-status-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 🔥 新增：加号菜单容器 */
+.plus-menu-container {
+  position: relative;
+}
+
+/* 🔥 修改：加号按钮样式 */
+.plus-menu-button {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: var(--text-muted);
+  z-index: 1;
+}
+
+.plus-menu-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.plus-menu-button.active {
+  background: var(--accent-color);
+  color: white;
+}
+
+.plus-menu-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 🔥 新增：加号图标旋转动画 */
+.plus-icon {
+  transition: transform 0.2s ease;
+}
+
+.plus-icon.rotated {
+  transform: rotate(45deg);
+}
+
+/* 🔥 新增：加号菜单下拉框 */
+.plus-menu-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  min-width: 200px;
+  z-index: 1000;
+  animation: plus-menu-fade-in 0.2s ease-out;
+  overflow: hidden;
+}
+
+@keyframes plus-menu-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 🔥 新增：菜单项样式 */
+.plus-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  font-size: 14px;
+  position: relative;
+}
+
+.plus-menu-item:hover {
+  background: var(--hover-bg);
+}
+
+.plus-menu-item.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.plus-menu-item:not(:last-child) {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.plus-menu-icon {
+  font-size: 16px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.plus-menu-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.plus-menu-status {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* 🔥 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .plus-menu-dropdown {
+    background: var(--bg-primary);
+    border-color: var(--border-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  
+  .plus-menu-item {
+    color: var(--text-primary);
+  }
+  
+  .plus-menu-item:hover {
+    background: var(--hover-bg);
+  }
+  
+  .plus-menu-item.active {
+    background: rgba(16, 185, 129, 0.2);
+  }
+  
+  .search-status-indicator {
+    background: rgba(16, 185, 129, 0.95);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  }
+}
+
+/* 🔥 移动端优化 */
+@media (max-width: 768px) {
+  .plus-menu-dropdown {
+    min-width: 180px;
+    left: -8px;
+  }
+  
+  .plus-menu-item {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .plus-menu-icon {
+    font-size: 14px;
+    width: 18px;
+  }
+  
+  .search-status-indicator {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+  
+  .plus-menu-button {
+    width: 26px;
+    height: 26px;
+    left: 13px;
+  }
+}
+
+/* 🔥 高对比度模式 */
+@media (prefers-contrast: high) {
+  .plus-menu-dropdown {
+    border-width: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .plus-menu-item.active {
+    background: rgba(16, 185, 129, 0.3);
+    font-weight: 600;
+  }
+  
+  .search-status-indicator {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* 🔥 减少动画模式 */
+@media (prefers-reduced-motion: reduce) {
+  .plus-icon,
+  .plus-menu-dropdown,
+  .search-status-indicator,
+  .plus-menu-item {
+    animation: none;
+    transition: none;
+  }
+  
+  .plus-icon.rotated {
+    transform: none;
+  }
+}
+
+/* 🔥 确保菜单在输入框上方显示 */
+.chat-input-wrapper {
+  position: relative;
+}
+
+/* 🔥 当菜单打开时的遮罩效果（可选） */
+.plus-menu-container.menu-open::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* 🔥 新增：随机消息按钮样式 */
+.chat-random-button {
+  position: absolute;
+  right: 56px; /* 在发送按钮左侧 */
+  bottom: 50%;
+  transform: translateY(50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.chat-random-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  transform: translateY(50%) rotate(180deg);
+}
+
+.chat-random-button:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(50%) rotate(180deg) scale(0.95);
+}
+
+.chat-random-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.chat-random-button svg {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 响应式：移动端优化 */
+@media (max-width: 768px) {
+  .chat-random-button {
+    width: 32px;
+    height: 32px;
+    right: 50px;
+  }
+  
+  .chat-random-button svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+

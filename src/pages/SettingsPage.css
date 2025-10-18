@@ -1,0 +1,44 @@
+/* 设置页面容器 */
+.settings-page {
+  padding: 24px;
+  background-color: #f8f9fa;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 添加平滑过渡 */
+  transform: translateX(0); /* 默认位置 */
+}
+
+/* 侧边栏折叠时的设置页面偏移 */
+.settings-page--sidebar-collapsed {
+  transform: translateX(-110px); /* 向左移动110px */
+}
+
+/* 为折叠状态下的内容区域添加左侧padding，防止内容被遮挡 */
+.settings-page--sidebar-collapsed .settings-header {
+  padding-left: calc(24px + 110px); /* 原有padding + 偏移补偿 */
+}
+
+.settings-page--sidebar-collapsed .settings-content {
+  padding-left: 110px;
+}
+
+/* 移动端不需要偏移，因为侧边栏是覆盖模式 */
+@media (max-width: 768px) {
+  .settings-page--sidebar-collapsed {
+    transform: translateX(0); /* 移动端保持原位 */
+  }
+  
+  .settings-page--sidebar-collapsed .settings-header {
+    padding-left: 24px; /* 恢复原始padding */
+  }
+  
+  .settings-page--sidebar-collapsed .settings-content {
+    padding-left: 0; /* 恢复原始padding */
+  }
+}
+
+/* ...existing styles... */

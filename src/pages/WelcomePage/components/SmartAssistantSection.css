@@ -1,0 +1,319 @@
+/* Smart Assistant Section */
+.smart-assistant-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 6rem 2rem;
+}
+
+.smart-assistant-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.smart-assistant-header .section-title {
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.smart-assistant-header .section-divider {
+  width: 80px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.8);
+  margin: 1.5rem auto;
+  border-radius: 2px;
+}
+
+.smart-assistant-header .section-description {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* AI Models Grid */
+.ai-models-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.ai-model-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.ai-model-card:hover {
+  transform: translateY(-10px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.model-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.model-icon {
+  font-size: 3rem;
+}
+
+.model-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.model-subtitle {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.model-description {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.model-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.model-features li {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.feature-bullet {
+  margin-right: 0.75rem;
+  color: #ffd700;
+  font-size: 0.8rem;
+}
+
+/* Coming Soon Section */
+.coming-soon-section {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  padding: 3rem;
+  margin-bottom: 3rem;
+  animation: fadeInUp 0.6s ease-out 0.3s;
+  animation-fill-mode: both;
+}
+
+.coming-soon-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.coming-soon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.coming-soon-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.coming-soon-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.feature-text {
+  font-size: 1.1rem;
+  color: white;
+  font-weight: 500;
+}
+
+/* Call to Action */
+.smart-assistant-cta {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  animation: fadeInUp 0.6s ease-out 0.6s;
+  animation-fill-mode: both;
+  margin-bottom: 2rem;
+}
+
+.cta-text {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.cta-email {
+  display: inline-block;
+  color: #ffd700;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.75rem 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.cta-email:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* Funding Notice */
+.funding-notice {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 179, 71, 0.2));
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 24px;
+  padding: 2.5rem;
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out 0.8s, pulse 2s ease-in-out infinite;
+  animation-fill-mode: both;
+  box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
+}
+
+.notice-content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.notice-text {
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 1rem;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.notice-highlight {
+  font-size: 1.3rem;
+  color: white;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.notice-link {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 1rem 2.5rem;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
+
+.notice-link:hover {
+  background: linear-gradient(135deg, #ffed4e, #ffd700);
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0%, 100% {
+    border-color: rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    border-color: rgba(255, 215, 0, 0.6);
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .smart-assistant-section {
+    padding: 4rem 1rem;
+  }
+
+  .smart-assistant-header .section-title {
+    font-size: 2.2rem;
+  }
+
+  .ai-models-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .coming-soon-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .coming-soon-section {
+    padding: 2rem 1.5rem;
+  }
+
+  .funding-notice {
+    padding: 1.5rem;
+  }
+
+  .notice-text {
+    font-size: 1rem;
+  }
+
+  .notice-highlight {
+    font-size: 1.15rem;
+  }
+
+  .notice-link {
+    font-size: 1rem;
+    padding: 0.875rem 2rem;
+  }
+}

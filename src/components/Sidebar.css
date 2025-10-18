@@ -1,0 +1,1465 @@
+/* 侧边栏样式 */
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background-color: #f3f4f6;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  pointer-events: auto;
+  transform: translateX(-100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar--open {
+  transform: translateX(0);
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.sidebar--collapsed {
+  width: 60px;
+  box-shadow: 1px 0 4px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+}
+
+/* 折叠按钮 - 增强动画效果 */
+.sidebar__collapse-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 32px;
+  height: 32px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.sidebar__collapse-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.sidebar__collapse-btn:active {
+  transform: translateY(0);
+  transition-duration: 0.1s;
+}
+
+.sidebar__collapse-btn:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1), 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.sidebar__collapse-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 14px;
+  height: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar__collapse-line {
+  width: 14px;
+  height: 2px;
+  background: #6b7280;
+  border-radius: 1px;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform-origin: center;
+}
+
+.sidebar__collapse-line--collapsed:first-child {
+  transform: rotate(45deg) translate(2px, 2px);
+  background: #10b981;
+}
+
+.sidebar__collapse-line--collapsed:last-child {
+  transform: rotate(-45deg) translate(2px, -2px);
+  background: #10b981;
+}
+
+/* 侧边栏内容容器 - 优化淡入淡出效果 */
+.sidebar__content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  opacity: 1;
+  transition: opacity 0.25s ease-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-top: 60px;
+  transform: translateX(0);
+  pointer-events: auto;
+  position: relative;
+  z-index: 1001;
+}
+
+.sidebar__content--hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px);
+}
+
+/* 移动端遮罩 - 优化动画 */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  animation: overlayFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes overlayFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* 品牌头部 - 添加微妙动画 */
+.sidebar__header {
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-top: -60px;
+  padding-top: 84px;
+  transition: all 0.3s ease;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #1f2937;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  padding: 8px;
+  margin: -8px;
+}
+
+.sidebar__brand:hover {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
+  transform: translateY(-1px);
+}
+
+.sidebar__brand-icon {
+  font-size: 24px;
+  animation: brandPulse 3s ease-in-out infinite;
+  transition: transform 0.2s ease;
+}
+
+.sidebar__brand:hover .sidebar__brand-icon {
+  transform: scale(1.1);
+}
+
+@keyframes brandPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.sidebar__brand-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  transition: color 0.2s ease;
+}
+
+/* 侧边栏区块 */
+.sidebar__section {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sidebar__section--flex {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sidebar__section-title {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+/* 导航容器 */
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar__nav-item-container {
+  position: static;
+}
+
+/* 导航链接 - 增强动画效果 */
+.sidebar__nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  color: #6b7280;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar__nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s ease;
+}
+
+.sidebar__nav-link:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  transform: translateX(2px);
+}
+
+.sidebar__nav-link:hover::before {
+  left: 100%;
+}
+
+.sidebar__nav-link--active {
+  background-color: #e5f3ff;
+  color: #0066cc;
+  box-shadow: 0 2px 4px rgba(0, 102, 204, 0.1);
+}
+
+.sidebar__nav-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.sidebar__nav-link:hover .sidebar__nav-icon {
+  transform: scale(1.1);
+}
+
+.sidebar__nav-arrow {
+  margin-left: auto;
+  font-size: 10px;
+  color: #9ca3af;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar__nav-arrow--up {
+  transform: rotate(180deg);
+  color: #10b981;
+}
+
+/* 聊天列表 */
+.sidebar__chat-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.sidebar__load-more {
+  padding: 16px 12px;
+  text-align: center;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 8px;
+}
+
+.sidebar__load-more-text {
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* 聊天项目 - 完全重写以支持三个点菜单 */
+.sidebar__chat-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  text-align: left;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 4px;
+  position: relative;
+  overflow: hidden;
+  padding-right: 8px;
+  pointer-events: auto;
+  z-index: 1002;
+}
+
+.sidebar__chat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.4s ease;
+}
+
+.sidebar__chat-item:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  transform: translateX(3px);
+}
+
+.sidebar__chat-item:hover::before {
+  left: 100%;
+}
+
+.sidebar__chat-item--active {
+  background-color: #e5f3ff;
+  color: #0066cc;
+  transform: translateX(3px);
+  box-shadow: 0 2px 4px rgba(0, 102, 204, 0.1);
+}
+
+.sidebar__chat-icon {
+  font-size: 14px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.sidebar__chat-item:hover .sidebar__chat-icon {
+  opacity: 1;
+}
+
+.sidebar__chat-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+/* 三个点菜单按钮 */
+.sidebar__chat-menu-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+.sidebar__chat-menu-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.sidebar__chat-menu-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* 显示三个点按钮的条件 */
+.sidebar__chat-item:hover .sidebar__chat-menu-btn,
+.sidebar__chat-item--menu-open .sidebar__chat-menu-btn,
+.sidebar__chat-item--renaming .sidebar__chat-menu-btn {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar__chat-menu-icon {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1;
+  font-weight: bold;
+}
+
+/* 聊天菜单下拉框 */
+.sidebar__chat-menu {
+  position: fixed;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  z-index: 99999;
+  min-width: 140px;
+  animation: chatMenuSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
+}
+
+@keyframes chatMenuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.sidebar__chat-menu-item {
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.sidebar__chat-menu-item:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar__chat-menu-item:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  transform: translateX(2px);
+}
+
+.sidebar__chat-menu-item--danger {
+  color: #dc2626;
+}
+
+.sidebar__chat-menu-item--danger:hover {
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
+.sidebar__chat-menu-item-icon {
+  font-size: 12px;
+  opacity: 0.8;
+  width: 14px;
+  text-align: center;
+}
+
+/* 重命名输入框 */
+.sidebar__chat-rename-input {
+  position: absolute;
+  left: 44px;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ffffff;
+  border: 1px solid #10b981;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  z-index: 20;
+}
+
+.sidebar__chat-rename-input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+/* 重命名状态下的样式调整 */
+.sidebar__chat-item--renaming .sidebar__chat-text {
+  opacity: 0;
+}
+
+.sidebar__chat-item--renaming {
+  background-color: #f3f4f6;
+}
+
+/* 空状态 */
+.sidebar__empty-state {
+  padding: 24px 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* 用户信息 - 增强交互 */
+.sidebar__footer {
+  padding: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  padding: 12px;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+.sidebar__user:hover {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar__user-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  transition: transform 0.2s ease;
+}
+
+.sidebar__user:hover .sidebar__user-avatar {
+  transform: scale(1.05);
+}
+
+.sidebar__user-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: all 0.2s ease;
+}
+
+.sidebar__user-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: #22c55e;
+  border: 2px solid #f3f4f6;
+  border-radius: 50%;
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+  }
+}
+
+.sidebar__user-info {
+  flex: 1;
+}
+
+.sidebar__user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.sidebar__user-status-text {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* 子菜单样式 */  
+.sidebar__submenu {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 240px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  margin-left: 8px;
+  z-index: 9999;
+  animation: slideIn 0.2s ease-out;
+}
+
+.sidebar__submenu-header {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 8px;
+}
+
+.sidebar__submenu-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.sidebar__submenu-current {
+  font-size: 14px;
+  font-weight: 500;
+  color: #10b981;
+  margin-top: 4px;
+  display: block;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.sidebar__submenu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  margin-bottom: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar__submenu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.1), transparent);
+  transition: left 0.3s ease;
+}
+
+.sidebar__submenu-item:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  transform: translateX(2px);
+}
+
+.sidebar__submenu-item:hover::before {
+  left: 100%;
+}
+
+.sidebar__submenu-item--active {
+  background-color: #e5f3ff;
+  color: #10b981;
+  font-weight: 500;
+  transform: translateX(2px);
+}
+
+.sidebar__submenu-icon {
+  font-size: 14px;
+}
+
+.sidebar__submenu-text {
+  font-weight: 500;
+}
+
+/* 下拉菜单 - 优化动画 */
+.sidebar__submenu--portal {
+  animation: dropdownSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Tooltip - 增强动画 */
+.sidebar__tooltip {
+  pointer-events: none;
+  animation: tooltipFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar__tooltip-content {
+  background: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+.sidebar__tooltip-arrow {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.9);
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* 滚动条美化 */
+.sidebar__chat-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar__chat-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar__chat-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.sidebar__chat-list::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 响应式设计 */
+@media (min-width: 768px) {
+  .sidebar {
+    position: static;
+    transform: translateX(0);
+    z-index: auto;
+    height: 100vh;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar-overlay {
+    display: none;
+  }
+}
+
+/* 折叠状态下的特殊处理 */
+.sidebar--collapsed .sidebar__submenu {
+  left: 60px;
+  margin-left: 0;
+  z-index: 9999;
+}
+
+.sidebar--collapsed .sidebar__nav-arrow {
+  display: none;
+}
+
+.sidebar--collapsed .sidebar__nav-link {
+  justify-content: center;
+  padding: 12px 8px;
+}
+
+.sidebar--collapsed .sidebar__nav-text {
+  display: none;
+}
+
+/* 性能优化 */
+.sidebar {
+  will-change: width, transform;
+}
+
+.sidebar__content {
+  will-change: opacity, transform;
+}
+
+.sidebar__chat-menu-btn {
+  will-change: opacity, visibility, transform;
+}
+
+.sidebar__chat-rename-input {
+  will-change: transform;
+}
+
+/* 深色模式支持 (可选) */
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    background-color: #1f2937;
+    border-right-color: #374151;
+  }
+  
+  .sidebar__brand-text {
+    color: #f9fafb;
+  }
+  
+  .sidebar__nav-link {
+    color: #9ca3af;
+  }
+  
+  .sidebar__nav-link:hover {
+    background-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .sidebar__chat-item {
+    color: #9ca3af;
+  }
+  
+  .sidebar__chat-item:hover {
+    background-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .sidebar__chat-menu {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .sidebar__chat-menu-item {
+    color: #d1d5db;
+  }
+  
+  .sidebar__chat-menu-item:hover {
+    background-color: #4b5563;
+    color: #f9fafb;
+  }
+}
+
+/* 可访问性增强 */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar__content,
+  .sidebar__nav-link,
+  .sidebar__chat-item,
+  .sidebar__chat-menu-btn,
+  .sidebar__chat-menu {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .sidebar {
+    border-right-width: 2px;
+  }
+  
+  .sidebar__nav-link,
+  .sidebar__chat-item {
+    border: 1px solid transparent;
+  }
+  
+  .sidebar__nav-link:focus,
+  .sidebar__chat-item:focus {
+    border-color: currentColor;
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* 新建对话按钮加载状态 */
+.sidebar__nav-link--new-chat {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar__nav-link--loading {
+  pointer-events: none;
+  opacity: 0.8;
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
+  background-size: 200% 100%;
+  animation: sidebar-loading-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes sidebar-loading-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.sidebar__nav-link--loading .sidebar__nav-text {
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* 确保加载动画正常工作 */
+.sidebar__loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #10b981;
+  border-radius: 50%;
+  animation: sidebar-spin 1s linear infinite;
+  display: inline-block;
+}
+
+.sidebar__loading-spinner--small {
+  width: 14px;
+  height: 14px;
+  border-width: 1.5px;
+}
+
+/* 确保动画关键帧正确 */
+@keyframes sidebar-spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+/* 修复可能的 CSS 冲突 */
+.sidebar__nav-link--loading .sidebar__loading-spinner {
+  animation: sidebar-spin 1s linear infinite !important;
+}
+
+/* 新建对话按钮的特殊样式 */
+.sidebar__nav-link--new-chat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.sidebar__nav-link--new-chat:hover::before {
+  left: 100%;
+}
+
+.sidebar__nav-link--new-chat:hover {
+  background-color: #f0fdf4;
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.sidebar__nav-link--new-chat:disabled {
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sidebar__nav-link--new-chat:disabled:hover::before {
+  left: -100%;
+}
+
+/* 脉冲效果 - 用于强调新建对话 */
+.sidebar__nav-link--new-chat {
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar__nav-link--new-chat:not(.sidebar__nav-link--loading):hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+@keyframes sidebar-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
+
+/* 成功创建的反馈动画 */
+.sidebar__nav-link--success {
+  background: linear-gradient(90deg, #dcfce7, #bbf7d0, #dcfce7);
+  animation: sidebar-success-flash 0.6s ease-out;
+}
+
+@keyframes sidebar-success-flash {
+  0% {
+    background: #10b981;
+    color: white;
+    transform: scale(1.02);
+  }
+  100% {
+    background: transparent;
+    color: inherit;
+    transform: scale(1);
+  }
+}
+
+/* 深色模式下的加载样式 */
+@media (prefers-color-scheme: dark) {
+  .sidebar__nav-link--loading {
+    background: linear-gradient(90deg, #374151, #4b5563, #374151);
+  }
+  
+  .sidebar__loading-spinner {
+    border-color: #4b5563;
+    border-top-color: #10b981;
+  }
+  
+  .sidebar__nav-link--new-chat:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .sidebar__loading-spinner {
+    border-width: 3px;
+  }
+  
+  .sidebar__nav-link--loading {
+    border: 2px solid #10b981;
+  }
+}
+
+/* 减少动画模式 */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar__nav-link--loading {
+    animation: none;
+    background: #f3f4f6;
+  }
+  
+  .sidebar__loading-spinner {
+    animation: none;
+    border: 2px solid #10b981;
+    border-radius: 50%;
+  }
+  
+  .sidebar__loading-spinner::after {
+    content: '●';
+    color: #10b981;
+    font-size: 8px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .sidebar__loading-spinner {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .sidebar__loading-spinner--small {
+    width: 10px;
+    height: 10px;
+    border-width: 1px;
+  }
+  
+  .sidebar__nav-link--new-chat {
+    padding: 14px 12px;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .sidebar__nav-link--new-chat::before {
+    display: none;
+  }
+  
+  .sidebar__nav-link--new-chat:active {
+    background-color: #f0fdf4;
+    transform: scale(0.98);
+  }
+}
+
+/* 为侧边栏添加整体加载状态 (可选) */
+.sidebar--creating-chat {
+  pointer-events: none;
+}
+
+.sidebar--creating-chat .sidebar__nav-link:not(.sidebar__nav-link--new-chat) {
+  opacity: 0.6;
+}
+
+.sidebar--creating-chat .sidebar__chat-item {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* 成功状态的微妙提示 */
+.sidebar__nav-link--new-chat.sidebar__nav-link--success .sidebar__nav-icon {
+  animation: sidebar-success-bounce 0.6s ease-out;
+}
+
+@keyframes sidebar-success-bounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* 🔥 新增：聊天列表整体加载动画 */
+.sidebar__chat-list-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 16px;
+  animation: sidebar-chat-loading-fade-in 0.5s ease-out;
+}
+
+.sidebar__chat-list-loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.sidebar__chat-list-loading-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-top: 8px;
+}
+
+.sidebar__chat-list-loading-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* 🔥 新增：大型加载动画 */
+.sidebar__loading-spinner--large {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #10b981;
+  border-radius: 50%;
+  animation: sidebar-spin 1s linear infinite;
+}
+
+/* 🔥 新增：聊天加载动画（绿色） */
+.sidebar__loading-spinner--chat {
+  border-color: #d1fae5;
+  border-top-color: #10b981;
+  animation: sidebar-spin 1s linear infinite, sidebar-chat-pulse 2s ease-in-out infinite;
+}
+
+@keyframes sidebar-chat-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* 🔥 新增：骨架屏动画 */
+.sidebar__chat-list-skeleton {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.sidebar__chat-skeleton-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f9fafb;
+  animation: sidebar-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.sidebar__chat-skeleton-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #e5e7eb, #f3f4f6, #e5e7eb);
+  background-size: 200% 100%;
+  animation: sidebar-skeleton-wave 1.5s ease-in-out infinite;
+}
+
+.sidebar__chat-skeleton-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar__chat-skeleton-title {
+  height: 14px;
+  background: linear-gradient(90deg, #e5e7eb, #f3f4f6, #e5e7eb);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  width: 70%;
+  animation: sidebar-skeleton-wave 1.5s ease-in-out infinite;
+}
+
+.sidebar__chat-skeleton-subtitle {
+  height: 12px;
+  background: linear-gradient(90deg, #e5e7eb, #f3f4f6, #e5e7eb);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  width: 40%;
+  animation: sidebar-skeleton-wave 1.5s ease-in-out infinite 0.1s;
+}
+
+@keyframes sidebar-skeleton-wave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes sidebar-skeleton-shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes sidebar-chat-loading-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 🔥 新增：聊天项目加载状态 */
+.sidebar__chat-item--loading {
+  opacity: 0.8;
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
+  background-size: 200% 100%;
+  animation: sidebar-chat-item-loading 1.5s ease-in-out infinite;
+  cursor: wait;
+  pointer-events: none;
+}
+
+.sidebar__chat-item--loading:hover {
+  transform: none;
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
+  background-size: 200% 100%;
+}
+
+.sidebar__chat-item--loading::before {
+  display: none;
+}
+
+@keyframes sidebar-chat-item-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 🔥 新增：加载状态下的文本动画 */
+.sidebar__chat-item--loading .sidebar__chat-text {
+  color: #10b981;
+  font-style: italic;
+  animation: sidebar-loading-text-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes sidebar-loading-text-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* 🔥 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .sidebar__chat-list-loading-text {
+    color: #f9fafb;
+  }
+  
+  .sidebar__chat-list-loading-subtitle {
+    color: #d1d5db;
+  }
+  
+  .sidebar__loading-spinner--large {
+    border-color: #374151;
+    border-top-color: #10b981;
+  }
+  
+  .sidebar__chat-skeleton-item {
+    background: #374151;
+  }
+  
+  .sidebar__chat-skeleton-icon,
+  .sidebar__chat-skeleton-title,
+  .sidebar__chat-skeleton-subtitle {
+    background: linear-gradient(90deg, #4b5563, #6b7280, #4b5563);
+    background-size: 200% 100%;
+  }
+  
+  .sidebar__chat-item--loading {
+    background: linear-gradient(90deg, #374151, #4b5563, #374151);
+    background-size: 200% 100%;
+  }
+  
+  .sidebar__chat-item--loading:hover {
+    background: linear-gradient(90deg, #374151, #4b5563, #374151);
+    background-size: 200% 100%;
+  }
+}
+
+/* 🔥 移动端优化 */
+@media (max-width: 768px) {
+  .sidebar__chat-list-loading {
+    padding: 24px 12px;
+    gap: 16px;
+  }
+  
+  .sidebar__loading-spinner--large {
+    width: 28px;
+    height: 28px;
+    border-width: 2.5px;
+  }
+  
+  .sidebar__chat-list-loading-text {
+    font-size: 13px;
+  }
+  
+  .sidebar__chat-list-loading-subtitle {
+    font-size: 11px;
+  }
+  
+  .sidebar__chat-skeleton-item {
+    padding: 10px;
+    gap: 10px;
+  }
+}
+
+/* 🔥 减少动画模式 */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar__chat-list-loading,
+  .sidebar__chat-skeleton-item,
+  .sidebar__chat-item--loading {
+    animation: none;
+  }
+  
+  .sidebar__loading-spinner--large,
+  .sidebar__loading-spinner--chat {
+    animation: none;
+    border: 3px solid #10b981;
+    border-radius: 50%;
+  }
+  
+  .sidebar__chat-skeleton-icon,
+  .sidebar__chat-skeleton-title,
+  .sidebar__chat-skeleton-subtitle {
+    background: #e5e7eb;
+    animation: none;
+  }
+  
+  .sidebar__chat-item--loading {
+    background: #f3f4f6;
+  }
+}
+
+/* 🔥 高对比度模式 */
+@media (prefers-contrast: high) {
+  .sidebar__loading-spinner--large,
+  .sidebar__loading-spinner--chat {
+    border-width: 4px;
+  }
+  
+  .sidebar__chat-list-loading-text {
+    font-weight: 700;
+  }
+  
+  .sidebar__chat-item--loading {
+    border: 2px solid #10b981;
+  }
+}

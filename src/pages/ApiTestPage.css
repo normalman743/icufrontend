@@ -1,0 +1,461 @@
+/* API测试页面样式 */
+.api-test-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.api-test-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.api-test-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.api-test-header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0 0 16px 0; /* 🔥 修改：为管理员标识留出空间 */
+}
+
+/* 🔥 新增：管理员标识样式 */
+.api-test-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 8px 16px;
+  margin-top: 12px;
+  animation: adminBadgeGlow 2s ease-in-out infinite alternate;
+}
+
+.api-test-admin-icon {
+  font-size: 18px;
+}
+
+.api-test-admin-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* 🔥 新增：管理员标识发光动画 */
+@keyframes adminBadgeGlow {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 30px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.api-test-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  height: calc(100vh - 140px);
+}
+
+/* 控制面板 */
+.api-test-controls {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  overflow-y: auto;
+}
+
+.api-test-section {
+  margin-bottom: 30px;
+}
+
+.api-test-section:last-child {
+  margin-bottom: 0;
+}
+
+.api-test-section h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* 按钮样式 */
+.api-test-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.api-test-btn {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f7fafc;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+  position: relative; /* 🔥 新增：为加载动画定位 */
+}
+
+.api-test-btn:hover:not(:disabled) {
+  background: #edf2f7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.api-test-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.api-test-btn--primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+.api-test-btn--primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a67d8, #6b46c1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.api-test-btn--secondary {
+  background: #fed7d7;
+  color: #c53030;
+  border-color: #feb2b2;
+}
+
+.api-test-btn--secondary:hover:not(:disabled) {
+  background: #feb2b2;
+  color: #9b2c2c;
+}
+
+/* 文件上传区域 */
+.api-test-file-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.api-test-file-input {
+  padding: 12px;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  background: #f7fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.api-test-file-input:hover {
+  border-color: #667eea;
+  background: #edf2f7;
+}
+
+.api-test-file-info {
+  font-size: 14px;
+  color: #718096;
+  padding: 8px 12px;
+  background: #f7fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+/* 状态显示 */
+.api-test-status {
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.api-test-status p {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.api-test-status ul {
+  margin: 0 0 16px 0;
+  padding-left: 20px;
+}
+
+.api-test-status li {
+  font-size: 14px;
+  color: #4a5568;
+  margin-bottom: 4px;
+}
+
+.api-test-status li:last-child {
+  margin-bottom: 0;
+}
+
+/* 测试结果区域 */
+.api-test-results {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+}
+
+.api-test-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.api-test-results-header h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+}
+
+.api-test-results-count {
+  font-size: 14px;
+  color: #718096;
+  background: #edf2f7;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+/* 日志容器 */
+.api-test-log-container {
+  flex: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f7fafc;
+}
+
+.api-test-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #a0aec0;
+  text-align: center;
+}
+
+.api-test-empty p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.api-test-log {
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.api-test-log-item {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #667eea;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  word-break: break-word;
+}
+
+.api-test-log-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 自定义滚动条 */
+.api-test-log::-webkit-scrollbar {
+  width: 6px;
+}
+
+.api-test-log::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.api-test-log::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.api-test-log::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.api-test-controls::-webkit-scrollbar {
+  width: 6px;
+}
+
+.api-test-controls::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.api-test-controls::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.api-test-controls::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .api-test-content {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  
+  .api-test-controls {
+    order: 2;
+  }
+  
+  .api-test-results {
+    order: 1;
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .api-test-page {
+    padding: 16px;
+  }
+  
+  .api-test-header h1 {
+    font-size: 2rem;
+  }
+  
+  .api-test-header p {
+    font-size: 1rem;
+  }
+  
+  .api-test-content {
+    gap: 20px;
+  }
+  
+  .api-test-controls,
+  .api-test-results {
+    padding: 20px;
+  }
+  
+  .api-test-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .api-test-results {
+    height: 300px;
+  }
+  
+  /* 🔥 移动端管理员标识调整 */
+  .api-test-admin-badge {
+    padding: 6px 12px;
+  }
+  
+  .api-test-admin-icon {
+    font-size: 16px;
+  }
+  
+  .api-test-admin-text {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .api-test-page {
+    padding: 12px;
+  }
+  
+  .api-test-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .api-test-controls,
+  .api-test-results {
+    padding: 16px;
+  }
+  
+  .api-test-section h3 {
+    font-size: 1.2rem;
+  }
+  
+  .api-test-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.api-test-page {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.api-test-log-item {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 🔥 修复：加载状态样式 */
+.api-test-btn:disabled {
+  position: relative;
+}
+
+.api-test-btn:disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

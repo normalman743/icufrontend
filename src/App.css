@@ -1,0 +1,12 @@
+.app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 确保主内容区域正确显示 */
+.app > * {
+  flex-shrink: 0;
+}
+
+/* 移除其他不需要的样式 */

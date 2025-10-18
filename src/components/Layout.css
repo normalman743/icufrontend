@@ -1,0 +1,133 @@
+/* 布局样式 */
+.layout {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+}
+
+/* 移动端顶部栏 */
+.layout__mobile-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: var(--primary-800);
+  border-bottom: 1px solid var(--primary-600);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+}
+
+.layout__menu-toggle {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: var(--text-xl);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-base);
+  transition: background var(--duration-fast);
+}
+
+.layout__menu-toggle:hover {
+  background: var(--primary-600);
+}
+
+.layout__mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.layout__mobile-brand-icon {
+  font-size: var(--text-xl);
+}
+
+.layout__mobile-brand-text {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  background: linear-gradient(135deg, var(--accent-500), var(--accent-700));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 侧边栏容器 */
+.layout__sidebar {
+  flex-shrink: 0;
+  /* 在桌面端，侧边栏会根据是否打开来决定宽度 */
+}
+
+/* 主内容区 */
+.layout__main {
+  flex: 1;
+  overflow: hidden;
+  background: #f8f9fa;
+  min-width: 0;
+  position: relative;
+  /* 主内容区域会自动占满剩余空间 */
+  transition: all 0.3s ease-out;
+}
+
+/* 桌面端样式 */
+@media (min-width: 768px) {
+  /* 当侧边栏打开时 */
+  .layout--sidebar-open .layout__sidebar {
+    width: 280px; /* 正常宽度 */
+  }
+  
+  /* 当侧边栏关闭时 */
+  .layout:not(.layout--sidebar-open) .layout__sidebar {
+    width: 0; /* 完全隐藏 */
+    overflow: hidden;
+  }
+  
+  /* 当侧边栏折叠时 */
+  .layout--sidebar-open .layout__sidebar .sidebar--collapsed {
+    width: 60px;
+  }
+  
+  .layout--sidebar-open.layout--sidebar-collapsed .layout__sidebar {
+    width: 60px;
+  }
+}
+
+/* 移动端样式 */
+@media (max-width: 767px) {
+  .layout__sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-out;
+  }
+  
+  .layout--sidebar-open .layout__sidebar {
+    transform: translateX(0);
+  }
+  
+  .layout__main {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* 旧的不需要的样式，移除或注释掉 */
+.layout__header {
+  display: none;
+}
+
+.layout__menu-button {
+  display: none;
+}
+
+.layout__mobile-header {
+  display: none;
+}

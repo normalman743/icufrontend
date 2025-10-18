@@ -1,0 +1,129 @@
+/* Content Section Styles */
+.content-section {
+  min-height: calc(100vh - 80px); /* Subtract navbar height */
+  padding: 4rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-white {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.section-light {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.section-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.section-gradient .section-title,
+.section-gradient .section-description {
+  color: white;
+}
+
+.section-gradient .section-divider {
+  background: white;
+}
+
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #1a202c;
+}
+
+.section-divider {
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0 auto 2rem;
+  border-radius: 2px;
+}
+
+.section-description {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #718096;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  line-height: 1.6;
+}
+
+.section-content {
+  margin-top: 3rem;
+}
+
+/* Content Placeholders */
+.content-placeholder {
+  margin-top: 3rem;
+}
+
+.placeholder-box {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px dashed #cbd5e0;
+  border-radius: 20px;
+  padding: 4rem 2rem;
+  text-align: center;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.section-gradient .placeholder-box {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.placeholder-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.placeholder-box p {
+  font-size: 1.2rem;
+  color: #718096;
+  font-weight: 500;
+  margin: 0;
+}
+
+.section-gradient .placeholder-box p {
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content-section {
+    padding: 4rem 1rem 3rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 1.8rem;
+  }
+}

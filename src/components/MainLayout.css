@@ -1,0 +1,131 @@
+/* 主布局样式 - 简化版本 */
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #ffffff;
+  position: relative;
+}
+
+/* 移动端顶部栏 */
+.main-layout__mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  height: 56px;
+  box-sizing: border-box;
+}
+
+.main-layout__menu-toggle {
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.main-layout__menu-toggle:hover {
+  background: #f3f4f6;
+}
+
+.main-layout__menu-toggle:active {
+  transform: scale(0.95);
+}
+
+.main-layout__menu-line {
+  width: 20px;
+  height: 2px;
+  background: #374151;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.main-layout__mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.main-layout__mobile-brand-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.main-layout__mobile-brand-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* 主内容区域 - 简化逻辑 */
+.main-layout__content {
+  flex: 1;
+  min-height: 100vh;
+  background-color: #ffffff;
+  position: relative;
+  z-index: 1;
+  /* 移除固定的 margin-left，让 CSS Grid 或 Flexbox 处理布局 */
+}
+
+/* 内容容器 */
+.main-layout__content-inner {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 桌面端样式 */
+@media (min-width: 768px) {
+  .main-layout__mobile-header {
+    display: none;
+  }
+}
+
+/* 移动端样式 */
+@media (max-width: 767px) {
+  .main-layout__mobile-header {
+    display: flex;
+  }
+  
+  .main-layout__content-inner {
+    padding-top: 56px; /* 为顶部栏留出空间 */
+    min-height: calc(100vh - 56px);
+  }
+}
+
+/* 小屏幕适配 */
+@media (max-width: 480px) {
+  .main-layout__mobile-header {
+    padding: 8px 12px;
+    height: 52px;
+  }
+  
+  .main-layout__content-inner {
+    padding-top: 52px;
+    min-height: calc(100vh - 52px);
+  }
+}
+
+/* 性能优化 */
+.main-layout__content-inner {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}

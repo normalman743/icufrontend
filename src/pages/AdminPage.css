@@ -1,0 +1,636 @@
+.admin-page {
+  /* 🔥 关键修复：确保页面可以滚动 */
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 20px;
+  transition: all 0.3s ease;
+  
+  /* 🔥 添加硬件加速 */
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-page--sidebar-collapsed {
+  margin-left: -200px;
+}
+
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: visible; /* 🔥 改为visible，让内容可以超出容器 */
+  min-height: auto;
+  margin-bottom: 40px;
+  
+  /* 🔥 确保容器不限制高度 */
+  height: auto;
+}
+
+/* 页面头部 */
+.admin-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  padding: 32px;
+  text-align: center;
+  position: relative;
+}
+
+.admin-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.admin-subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* 消息提示 */
+.admin-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  margin: 20px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+  z-index: 1;
+}
+
+.admin-message--error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.admin-message--success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.admin-message-icon {
+  font-size: 18px;
+}
+
+.admin-message-text {
+  flex: 1;
+}
+
+.admin-message-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.admin-message-close:hover {
+  opacity: 1;
+}
+
+/* 区域样式 */
+.admin-section {
+  padding: 32px;
+  border-bottom: 1px solid #e5e7eb;
+  min-height: auto;
+}
+
+.admin-section:last-child {
+  border-bottom: none;
+  padding-bottom: 40px;
+}
+
+.admin-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.admin-section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.admin-section-icon {
+  font-size: 28px;
+}
+
+/* 按钮样式 */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.admin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-btn--primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.admin-btn--primary:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.admin-btn--secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.admin-btn--secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.admin-btn--danger {
+  background: #ef4444;
+  color: white;
+}
+
+.admin-btn--danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.admin-btn--small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.admin-btn-icon {
+  font-size: 16px;
+}
+
+.admin-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+/* 表单样式 */
+.admin-form-card {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+.admin-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-form-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.admin-form-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.admin-form-close:hover {
+  color: #374151;
+}
+
+.admin-form-body {
+  padding: 24px;
+  display: grid;
+  gap: 20px;
+}
+
+.admin-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.admin-form-input {
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.admin-form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.admin-form-input:disabled {
+  background: #f3f4f6;
+  opacity: 0.7;
+}
+
+.admin-form-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px 24px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* 文件上传样式 */
+.admin-upload-container {
+  position: relative;
+}
+
+.admin-file-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 进度条样式 */
+.admin-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.admin-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.admin-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  transition: width 0.3s ease;
+}
+
+.admin-progress-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 40px;
+}
+
+/* 表格样式 */
+.admin-table-container {
+  overflow-x: auto;
+  overflow-y: visible;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  max-height: none;
+  min-height: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: auto;
+}
+
+.admin-table th {
+  background: #f8fafc;
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative; /* 🔥 改为相对定位，不固定表头 */
+  top: auto;
+  z-index: 1;
+}
+
+.admin-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.admin-table tr:hover {
+  background: #f8fafc;
+}
+
+.admin-table-empty {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  padding: 40px 20px;
+}
+
+/* 状态标签 */
+.admin-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.admin-status--used {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.admin-status--unused {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+/* 代码样式 */
+.admin-code {
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #374151;
+}
+
+/* 文件名样式 */
+.admin-filename {
+  max-width: 200px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.admin-file-type {
+  background: #e5e7eb;
+  color: #374151;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* 加载状态 */
+.admin-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.admin-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+/* 动画 */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 🔥 新增：自定义滚动指示器样式 - 和Chat界面一样 */
+.admin-scroll-indicator {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100vh;
+  background: rgba(243, 244, 246, 0.3);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-scroll-indicator--active {
+  opacity: 1;
+}
+
+.admin-scroll-thumb {
+  position: fixed;
+  right: 0;
+  width: 6px;
+  background: #d1d5db;
+  border-radius: 3px;
+  min-height: 30px;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(0) !important;
+  
+  transition: 
+    top 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    height 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s ease;
+  
+  will-change: top, height, opacity;
+}
+
+.admin-scroll-thumb--active {
+  opacity: 0.8;
+}
+
+.admin-scroll-thumb:hover {
+  background: #9ca3af;
+  opacity: 1 !important;
+  width: 8px;
+}
+
+/* 🔥 确保根元素可以滚动 */
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* 🔥 如果有固定定位的父容器，确保其允许滚动 */
+.app-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .admin-page {
+    padding: 12px;
+    overflow-y: auto;
+  }
+  
+  .admin-container {
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .admin-header {
+    padding: 24px 20px;
+  }
+  
+  .admin-title {
+    font-size: 24px;
+  }
+  
+  .admin-section {
+    padding: 20px;
+  }
+  
+  .admin-section-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .admin-form-body {
+    padding: 20px;
+  }
+  
+  .admin-table th,
+  .admin-table td {
+    padding: 12px 8px;
+  }
+  
+  .admin-btn-group {
+    flex-direction: column;
+  }
+  
+  .admin-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* 🔥 移动端滚动指示器调整 */
+  .admin-scroll-indicator,
+  .admin-scroll-thumb {
+    width: 4px;
+  }
+  
+  .admin-scroll-thumb {
+    border-radius: 2px;
+    min-height: 25px;
+  }
+  
+  .admin-scroll-thumb:hover {
+    width: 4px;
+  }
+}
+
+/* 🔥 高分辨率屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .admin-scroll-thumb {
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+/* 🔥 减少动画模式 */
+@media (prefers-reduced-motion: reduce) {
+  .admin-scroll-indicator,
+  .admin-scroll-thumb {
+    transition: none;
+  }
+  
+  .admin-page {
+    scroll-behavior: auto;
+  }
+}
+
+/* 🔥 自定义滚动条样式（备用方案） */
+.admin-page::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-page::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.admin-page::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.admin-page::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.admin-table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.admin-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.admin-table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.admin-table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

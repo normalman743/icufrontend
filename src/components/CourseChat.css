@@ -1,0 +1,1225 @@
+/* 课程聊天容器 */
+.course-chat-container {
+  height: 100vh;
+  background: #f7f7f8;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 添加平滑过渡 */
+  transform: translateX(0); /* 默认位置 */
+}
+
+/* 侧边栏折叠时的课程聊天容器偏移 */
+.course-chat-container--sidebar-collapsed {
+  transform: translateX(-110px); /* 向左移动110px */
+}
+
+/* 为折叠状态下的内容区域添加左侧padding，防止内容被遮挡 */
+.course-chat-container--sidebar-collapsed .course-chat-header {
+  padding-left: calc(24px + 110px); /* 原有padding + 偏移补偿 */
+}
+
+.course-chat-container--sidebar-collapsed .course-chat-file-selector {
+  padding-left: calc(24px + 110px); /* 原有padding + 偏移补偿 */
+}
+
+.course-chat-container--sidebar-collapsed .course-chat-main {
+  padding-left: 110px;
+}
+
+.course-chat-container--sidebar-collapsed .course-chat-input-fixed {
+  padding-left: calc(20px + 110px); /* 原有padding + 偏移补偿 */
+}
+
+/* 移动端不需要偏移，因为侧边栏是覆盖模式 */
+@media (max-width: 768px) {
+  .course-chat-container--sidebar-collapsed {
+    transform: translateX(0); /* 移动端保持原位 */
+  }
+  
+  .course-chat-container--sidebar-collapsed .course-chat-header {
+    padding-left: 16px; /* 恢复原始padding */
+  }
+  
+  .course-chat-container--sidebar-collapsed .course-chat-file-selector {
+    padding-left: 24px; /* 恢复原始padding */
+  }
+  
+  .course-chat-container--sidebar-collapsed .course-chat-main {
+    padding-left: 0; /* 恢复原始padding */
+  }
+  
+  .course-chat-container--sidebar-collapsed .course-chat-input-fixed {
+    padding-left: 16px; /* 恢复原始padding */
+  }
+}
+
+/* 课程聊天容器 - 与Chat保持一致的全屏布局 */
+.course-chat-container {
+  height: 100vh;
+  background: #f7f7f8;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 顶部导航栏 */
+.course-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.course-chat-back-btn {
+  background: none;
+  border: none;
+  color: #10a37f;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.course-chat-back-btn:hover {
+  background: #f0fdf4;
+  color: #059669;
+}
+
+.course-chat-header-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0 16px;
+}
+
+.course-chat-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #343541;
+  margin: 0;
+}
+
+/* RAG 标识 */
+.course-chat-rag-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+  animation: rag-pulse 2s infinite;
+}
+
+@keyframes rag-pulse {
+  0%, 100% {
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5);
+  }
+}
+
+.course-chat-rag-icon {
+  font-size: 10px;
+}
+
+.course-chat-rag-text {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.course-chat-rag-count {
+  background: rgba(255, 255, 255, 0.3);
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.course-chat-status {
+  display: none; /* 🔥 隐藏原来的AI助手在线状态 */
+}
+
+/* 文件选择器 */
+.course-chat-file-selector {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 16px 24px;
+  max-height: 300px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.course-chat-file-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.course-chat-file-selector-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #343541;
+}
+
+.course-chat-file-selector-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.course-chat-clear-selection {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.course-chat-clear-selection:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.course-chat-close-selector {
+  background: none;
+  border: none;
+  color: #8e8ea0;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.course-chat-close-selector:hover {
+  background: #f1f1f4;
+  color: #565869;
+}
+
+.course-chat-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.course-chat-file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #ffffff;
+}
+
+.course-chat-file-item:hover {
+  border-color: #10a37f;
+  background: #f0fdf4;
+}
+
+.course-chat-file-item--selected {
+  border-color: #10a37f;
+  background: #f0fdf4;
+  box-shadow: 0 0 0 1px rgba(16, 163, 127, 0.1);
+}
+
+.course-chat-file-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.course-chat-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.course-chat-file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #343541;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.course-chat-file-meta {
+  font-size: 12px;
+  color: #8e8ea0;
+}
+
+.course-chat-file-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d9d9e3;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #10a37f;
+  font-weight: bold;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.course-chat-file-item--selected .course-chat-file-checkbox {
+  border-color: #10a37f;
+  background: #10a37f;
+  color: white;
+}
+
+/* 主聊天区域 - 与Chat保持一致 */
+.course-chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 无消息时的欢迎界面 - 居中显示 */
+.course-chat-welcome-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  gap: 24px;
+}
+
+.course-chat-welcome-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 32px;
+  font-weight: 600;
+  color: #343541;
+}
+
+.course-chat-welcome-logo-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.course-chat-welcome-logo-text {
+  background: linear-gradient(135deg, #10a37f, #1a73e8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.course-chat-welcome-greeting {
+  font-size: 24px;
+  color: #6e6e80;
+  font-weight: 400;
+  max-width: 600px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.course-chat-rag-enable-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 16px;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.course-chat-rag-enable-btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+}
+
+/* 聊天记录区域 - 隐藏滚动条 */
+.course-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 768px;
+  margin: 0 auto;
+  width: 100%;
+  
+  /* 隐藏滚动条但保持滚动功能 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  
+  /* 启用硬件加速 */
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+  
+  /* 优化滚动性能 */
+  contain: layout style paint;
+}
+
+.course-chat-messages::-webkit-scrollbar {
+  display: none;
+}
+
+/* 课程聊天滚动指示器 - 固定在屏幕右侧 */
+.course-chat-scroll-indicator {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100vh;
+  background: rgba(243, 244, 246, 0.3);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.course-chat-scroll-indicator--active {
+  opacity: 1;
+}
+
+.course-chat-scroll-thumb {
+  position: fixed;
+  right: 0;
+  width: 6px;
+  background: #d1d5db;
+  border-radius: 3px;
+  min-height: 30px;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(0) !important; /* 确保不受父元素影响 */
+  
+  /* 更流畅的过渡动画 */
+  transition: 
+    top 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    height 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s ease;
+  
+  /* 使用 will-change 优化性能 */
+  will-change: top, height, opacity;
+}
+
+.course-chat-scroll-thumb--active {
+  opacity: 0.8;
+}
+
+.course-chat-scroll-thumb:hover {
+  background: #9ca3af;
+  opacity: 1 !important;
+  width: 8px; /* 悬停时稍微变宽 */
+}
+
+/* 为课程聊天滚动指示器添加渐入渐出效果 */
+@keyframes courseScrollIndicatorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes courseScrollIndicatorFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .course-chat-scroll-indicator,
+  .course-chat-scroll-thumb {
+    width: 4px; /* 移动端更细 */
+  }
+  
+  .course-chat-scroll-thumb {
+    border-radius: 2px;
+    min-height: 25px;
+  }
+  
+  .course-chat-scroll-thumb:hover {
+    width: 4px; /* 移动端不变宽 */
+  }
+}
+
+/* 高分辨率屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .course-chat-scroll-thumb {
+    /* 在高分辨率屏幕上保持清晰 */
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+/* 确保滚动指示器始终在最右侧，不受侧边栏影响 */
+.course-chat-container--sidebar-collapsed .course-chat-scroll-indicator,
+.course-chat-container--sidebar-collapsed .course-chat-scroll-thumb {
+  transform: none !important;
+  right: 0 !important;
+}
+
+/* 性能优化 */
+.course-chat-scroll-indicator,
+.course-chat-scroll-thumb {
+  will-change: transform, opacity;
+}
+
+/* 移除或修改原有的滚动条样式，避免冲突 */
+.course-chat-messages::-webkit-scrollbar {
+  display: none; /* 确保原生滚动条被隐藏 */
+}
+
+/* 如果有其他滚动条样式，也要相应修改 */
+.course-chat-file-selector::-webkit-scrollbar {
+  width: 6px;
+}
+
+.course-chat-file-selector::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.course-chat-file-selector::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.course-chat-file-selector::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 聊天记录区域 - 与Chat保持一致 */
+.course-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 768px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.course-chat-message {
+  display: flex;
+  gap: 17px; /* 从19px缩小到17px（约减少10%） */
+  margin-bottom: 26px; /* 从29px缩小到26px（约减少10%） */
+  padding: 0 26px; /* 从29px缩小到26px（约减少10%） */
+  align-items: flex-start;
+}
+
+/* 用户消息靠右对齐 */
+.course-chat-message--user {
+  flex-direction: row-reverse;
+  text-align: right;
+  justify-content: flex-start;
+}
+
+/* AI消息靠左对齐 */
+.course-chat-message--assistant {
+  flex-direction: row;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.course-chat-message-avatar {
+  width: 52px; /* 从58px缩小到52px（约减少10%） */
+  height: 52px; /* 从58px缩小到52px（约减少10%） */
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.course-chat-message-avatar-image,
+.course-chat-message-avatar-bot {
+  width: 48px; /* 从54px缩小到48px（约减少10%） */
+  height: 48px; /* 从54px缩小到48px（约减少10%） */
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #f3f4f6;
+  padding: 2px;
+}
+
+.course-chat-message-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* 从6px缩小到5px */
+  min-width: 0;
+  max-width: 80%;
+}
+
+.course-chat-message-text {
+  font-size: 16px; /* 从18px缩小到16px（约减少10%） */
+  line-height: 1.6;
+  color: #343541;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* 用户消息文本右对齐 */
+.course-chat-message--user .course-chat-message-text {
+  text-align: right;
+}
+
+/* AI消息文本左对齐 */
+.course-chat-message--assistant .course-chat-message-text {
+  text-align: left;
+}
+
+.course-chat-message-time {
+  font-size: 12px; /* 从13px缩小到12px（约减少10%） */
+  color: #8e8ea0;
+}
+
+/* 用户消息时间右对齐 */
+.course-chat-message--user .course-chat-message-time {
+  text-align: right;
+}
+
+/* AI消息时间左对齐 */
+.course-chat-message--assistant .course-chat-message-time {
+  text-align: left;
+}
+
+.course-chat-message-loading {
+  display: flex;
+  align-items: center;
+  gap: 7px; /* 从8px缩小到7px */
+}
+
+.course-chat-typing-indicator {
+  display: flex;
+  gap: 3px; /* 从4px缩小到3px */
+  align-items: center;
+}
+
+.course-chat-typing-indicator span {
+  width: 6px; /* 从7px缩小到6px（约减少10%） */
+  height: 6px; /* 从7px缩小到6px（约减少10%） */
+  background: #8e8ea0;
+  border-radius: 50%;
+  animation: typing 1.4s infinite;
+}
+
+.course-chat-typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.course-chat-typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+/* 自定义聊天记录滚动条 */
+.course-chat-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.course-chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.course-chat-messages::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+.course-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 底部固定输入区域 - 与Chat保持一致 */
+.course-chat-input-fixed {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f7f7f8;
+  border-top: 1px solid #e5e5e5;
+  padding: 16px 20px 20px;
+  z-index: 10;
+}
+
+.course-chat-input-container {
+  max-width: 768px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.course-chat-input-wrapper {
+  background: #ffffff;
+  border: 1px solid #d9d9e3;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.course-chat-input-wrapper:focus-within {
+  border-color: #10a37f;
+  box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.2);
+}
+
+.course-chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.course-chat-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #343541;
+  background: transparent;
+  resize: none;
+  font-family: inherit;
+  min-height: 24px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.course-chat-input::placeholder {
+  color: #8e8ea0;
+}
+
+.course-chat-file-toggle-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #8e8ea0;
+  transition: all 0.2s ease;
+}
+
+.course-chat-file-toggle-btn:hover {
+  background: #f1f1f4;
+  color: #565869;
+}
+
+.course-chat-send-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #10a37f;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.course-chat-send-button:hover:not(:disabled) {
+  background: #0d9268;
+}
+
+.course-chat-send-button:disabled {
+  background: #d9d9e3;
+  cursor: not-allowed;
+}
+
+.course-chat-send-icon {
+  font-size: 16px;
+  color: white;
+  font-weight: bold;
+}
+
+.course-chat-input-hint {
+  text-align: center;
+  font-size: 13px;
+  color: #8e8ea0;
+  margin-top: 12px;
+}
+
+.course-chat-rag-active {
+  color: #10a37f;
+  font-weight: 500;
+}
+
+/* 🔥 修改：模型选择器样式 - 与Chat组件保持一致 */
+.course-chat-model-selector {
+  position: relative;
+  z-index: 1000;
+}
+
+.course-chat-model-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  color: #374151;
+}
+
+.course-chat-model-trigger:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.course-chat-model-trigger:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.course-chat-model-trigger--active {
+  border-color: #3b82f6;
+  background: #ffffff;
+}
+
+.course-chat-model-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.course-chat-model-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.course-chat-model-name {
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.2;
+  font-size: 14px;
+}
+
+.course-chat-model-arrow {
+  flex-shrink: 0;
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+.course-chat-model-arrow--rotated {
+  transform: rotate(180deg);
+}
+
+.course-chat-model-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-top: 4px;
+  overflow: hidden;
+  z-index: 1001;
+  animation: model-dropdown-appear 0.15s ease-out;
+}
+
+@keyframes model-dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.course-chat-model-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.course-chat-model-option:last-child {
+  border-bottom: none;
+}
+
+.course-chat-model-option:hover {
+  background: #f9fafb;
+}
+
+.course-chat-model-option--active {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.course-chat-model-option--active:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.course-chat-model-option-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.course-chat-model-option-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.course-chat-model-option-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.course-chat-model-option-name {
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.3;
+  font-size: 14px;
+}
+
+.course-chat-model-option-description {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.course-chat-model-option-check {
+  flex-shrink: 0;
+  color: #3b82f6;
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .course-chat-model-trigger {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .course-chat-model-trigger:hover:not(:disabled) {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .course-chat-model-dropdown {
+    background: #1f2937;
+    border-color: #374151;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .course-chat-model-option {
+    border-color: #374151;
+  }
+  
+  .course-chat-model-option:hover {
+    background: #374151;
+  }
+  
+  .course-chat-model-option--active {
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  .course-chat-model-name,
+  .course-chat-model-option-name {
+    color: #f9fafb;
+  }
+  
+  .course-chat-model-option-description {
+    color: #d1d5db;
+  }
+  
+  .course-chat-model-arrow {
+    color: #6b7280;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .course-chat-header {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .course-chat-header-center {
+    position: static;
+    transform: none;
+  }
+  
+  .course-chat-title {
+    font-size: 16px;
+  }
+  
+  .course-chat-messages {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .course-chat-message-content {
+    max-width: 85%;
+  }
+  
+  .course-chat-input-fixed {
+    padding: 12px 16px 16px;
+  }
+  
+  .course-chat-file-selector {
+    padding: 12px 16px;
+  }
+  
+  .course-chat-file-item {
+    padding: 10px;
+  }
+  
+  .course-chat-file-name {
+    font-size: 13px;
+  }
+  
+  .course-chat-file-meta {
+    font-size: 11px;
+  }
+  
+  .course-chat-model-trigger {
+    min-width: 160px;
+    padding: 6px 10px;
+  }
+  
+  .course-chat-model-name {
+    font-size: 13px;
+  }
+  
+  .course-chat-model-option-description {
+    font-size: 11px;
+  }
+  
+  .course-chat-model-option {
+    padding: 10px 12px;
+  }
+  
+  .course-chat-model-icon,
+  .course-chat-model-option-icon {
+    font-size: 16px;
+  }
+}
+
+/* 🔥 新增：新建聊天按钮样式 */
+.course-chat-new-chat-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #8e8ea0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.course-chat-new-chat-btn:hover:not(:disabled) {
+  background: #f1f1f4;
+  color: #10a37f;
+  transform: scale(1.05);
+}
+
+.course-chat-new-chat-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.course-chat-new-chat-btn:active {
+  transform: scale(0.95);
+}
+
+.course-chat-new-chat-icon {
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+/* 🔥 新增：新建聊天按钮的特殊hover效果 */
+.course-chat-new-chat-btn:hover:not(:disabled)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  background: rgba(16, 163, 127, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    width: 32px;
+    height: 32px;
+    opacity: 0.8;
+  }
+  100% {
+    width: 40px;
+    height: 40px;
+    opacity: 0;
+  }
+}
+
+/* 🔥 修改：调整输入行布局以适应新按钮 */
+.course-chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.course-chat-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #343541;
+  background: transparent;
+  resize: none;
+  font-family: inherit;
+  min-height: 24px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+/* 🔥 新增：深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .course-chat-new-chat-btn {
+    color: #d1d5db;
+  }
+  
+  .course-chat-new-chat-btn:hover:not(:disabled) {
+    background: #374151;
+    color: #10a37f;
+  }
+  
+  .course-chat-new-chat-btn:hover:not(:disabled)::after {
+    background: rgba(16, 163, 127, 0.2);
+  }
+}
+
+/* 🔥 新增：响应式设计 */
+@media (max-width: 768px) {
+  .course-chat-new-chat-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+  
+  .course-chat-new-chat-icon {
+    font-size: 18px;
+  }
+  
+  .course-chat-input-row {
+    gap: 8px;
+  }
+}
+
+/* 🔥 新增：加载状态时的禁用样式 */
+.course-chat-new-chat-btn:disabled {
+  color: #d1d5db;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.course-chat-new-chat-btn:disabled:hover {
+  background: transparent;
+  transform: none;
+}
+
+.course-chat-new-chat-btn:disabled:hover::after {
+  display: none;
+}
