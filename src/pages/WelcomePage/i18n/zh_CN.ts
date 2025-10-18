@@ -56,7 +56,7 @@ export default {
       title: '想看更多 AI 模型？',
       description: 'Star 是基于强大的大语言模型，并结合 CUHK 专属知识库打造的智能助手。如果使用我们服务的同学越来越多，我们会考虑支持更多底层模型。',
       suggestion: '你希望我们支持哪个 AI 模型？发邮件告诉我们：',
-      email: 'support@icu.584754.xyz',
+      email: 'support@icu.584743.xyz',
       close: '关闭',
     },
     // 答案折叠

@@ -140,8 +140,8 @@ const AboutUsSection: React.FC<AboutUsSectionProps> = ({
             {currentLanguage === 'zh_CN' ? '联系我们' : 'Contact Us'}
           </h4>
           <div className="contact-methods">
-            <a href="mailto:support@icu.584754.xyz" className="contact-link">
-              📧 support@icu.584754.xyz
+            <a href="mailto:support@icu.584743.xyz" className="contact-link">
+              📧 support@icu.584743.xyz
             </a>
           </div>
         </div>
@@ -186,8 +186,8 @@ const AboutUsSection: React.FC<AboutUsSectionProps> = ({
               </p>
               <p className="modal-other-methods">
                 {currentLanguage === 'zh_CN' 
-                  ? '其他方法支持我们，联系我们 📧 support@icu.584754.xyz' 
-                  : 'For other support methods, contact us 📧 support@icu.584754.xyz'}
+                  ? '其他方法支持我们，联系我们 📧 support@icu.584743.xyz' 
+                  : 'For other support methods, contact us 📧 support@icu.584743.xyz'}
               </p>
             </div>
           </div>

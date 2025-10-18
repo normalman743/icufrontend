@@ -90,8 +90,8 @@ const SmartAssistantSection: React.FC<SmartAssistantSectionProps> = ({
               ? '💡 有更好的想法？发邮件告诉我们' 
               : '💡 Have better ideas? Email us'}
           </p>
-          <a href="mailto:support@icu.584754.xyz" className="cta-email">
-            support@icu.584754.xyz
+          <a href="mailto:support@icu.584743.xyz" className="cta-email">
+            support@icu.584743.xyz
           </a>
         </div>
 

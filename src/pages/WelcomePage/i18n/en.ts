@@ -56,7 +56,7 @@ export default {
       title: 'Want More AI Models?',
       description: 'Star is built on powerful language models and enhanced with CUHK-exclusive knowledge base. As our user base grows, we may support more underlying models.',
       suggestion: 'Which AI model would you like us to support? Email us at:',
-      email: 'support@icu.584754.xyz',
+      email: 'support@icu.584743.xyz',
       close: 'Close',
     },
     // Answer Collapse
