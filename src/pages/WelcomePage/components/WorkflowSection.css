@@ -13,7 +13,7 @@
 .workflow-section {
   min-height: 100vh;
   position: relative;
-  padding-top: 80px; /* navbar 高度 */
+  padding-top: 0; /* 父容器 welcome-content 已经处理了 navbar 的 padding */
 }
 
 /* Header */
@@ -1001,7 +1001,7 @@ img.ai-avatar-content {
   }
 
   .workflow-section {
-    padding: 60px 0;
+    padding: 0; /* 移除所有 padding，父容器已处理 */
   }
 
   .workflow-title {
