@@ -7,35 +7,35 @@
   justify-content: center;
 }
 
-.section-white {
+.welcome-page .section-white {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 }
 
-.section-light {
+.welcome-page .section-light {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-.section-gradient {
+.welcome-page .section-gradient {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
-.section-gradient .section-title,
-.section-gradient .section-description {
+.welcome-page .section-gradient .section-title,
+.welcome-page .section-gradient .section-description {
   color: white;
 }
 
-.section-gradient .section-divider {
+.welcome-page .section-gradient .section-divider {
   background: white;
 }
 
-.section-container {
+.welcome-page .section-container {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
 }
 
-.section-title {
+.welcome-page .section-title {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
@@ -43,7 +43,7 @@
   color: #1a202c;
 }
 
-.section-divider {
+.welcome-page .section-divider {
   width: 80px;
   height: 4px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -51,7 +51,7 @@
   border-radius: 2px;
 }
 
-.section-description {
+.welcome-page .section-description {
   text-align: center;
   font-size: 1.1rem;
   color: #718096;
@@ -60,7 +60,7 @@
   line-height: 1.6;
 }
 
-.section-content {
+.welcome-page .section-content {
   margin-top: 3rem;
 }
 
@@ -83,7 +83,7 @@
   transition: all 0.3s ease;
 }
 
-.section-gradient .placeholder-box {
+.welcome-page .section-gradient .placeholder-box {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
   color: white;
@@ -107,7 +107,7 @@
   margin: 0;
 }
 
-.section-gradient .placeholder-box p {
+.welcome-page .section-gradient .placeholder-box p {
   color: white;
 }
 
@@ -117,13 +117,13 @@
     padding: 4rem 1rem 3rem;
   }
   
-  .section-title {
+  .welcome-page .section-title {
     font-size: 2rem;
   }
 }
 
 @media (max-width: 480px) {
-  .section-title {
+  .welcome-page .section-title {
     font-size: 1.8rem;
   }
 }

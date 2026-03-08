@@ -753,9 +753,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       console.log('=== 准备新建聊天 ===');
       
       // 🔥 不直接创建聊天，只是导航并清空状态
-      if (location.pathname !== '/') {
+      if (location.pathname !== '/chat') {
         console.log('导航到聊天页面...');
-        navigate('/');
+        navigate('/chat');
         // 给导航一点时间
         await new Promise(resolve => setTimeout(resolve, 100));
       }
@@ -956,9 +956,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       onSessionSelect(sessionId);
       
       // 🔥 如果不在聊天页面，先跳转到聊天页面
-      if (location.pathname !== '/') {
+      if (location.pathname !== '/chat') {
         console.log('跳转到聊天页面...');
-        navigate('/');
+        navigate('/chat');
         // 给路由跳转更多时间
         await new Promise(resolve => setTimeout(resolve, 300));
       }
@@ -1018,11 +1018,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* 品牌头部 */}
           <div className="sidebar__header">
             <Link 
-              to="/" 
+              to="/chat" 
               className="sidebar__brand" 
               onClick={() => {
                 onNewChat();
-                navigate('/');
+                navigate('/chat');
               }}
             >
               <img src="/iCU_Icon.png" alt="iCU Logo" className="sidebar__brand-icon" style={{ width: '32px', height: '32px' }} />

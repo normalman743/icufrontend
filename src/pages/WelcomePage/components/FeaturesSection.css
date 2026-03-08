@@ -7,7 +7,7 @@
   align-items: center;
 }
 
-.section-container {
+.welcome-page .section-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 40px;
@@ -32,7 +32,7 @@
   background-clip: text;
 }
 
-.section-divider {
+.welcome-page .section-divider {
   width: 80px;
   height: 4px;
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
