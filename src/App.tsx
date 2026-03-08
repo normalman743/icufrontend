@@ -140,6 +140,12 @@ const AppContent: React.FC = () => {
     console.log('App: 准备创建新聊天');
   };
 
+  // 🔥 模型/搜索切换时创建新对话
+  const handleCreateNewChat = (model?: AIModel, searchEnabled?: boolean) => {
+    setCurrentSessionId(null);
+    console.log('App: 切换模型/搜索创建新对话, model:', model, 'search:', searchEnabled);
+  };
+
   // 修复：创建新会话函数，确保消息顺序正确
   const createNewSession = async (firstMessage: string, fileTokens: string[] = [], model?: AIModel): Promise<string> => {
     try {
@@ -470,6 +476,7 @@ const AppContent: React.FC = () => {
                   currentSessionId={currentSessionId}
                   onCreateNewSession={createNewSession}
                   onAddMessage={addMessageToSession}
+                  onCreateNewChat={handleCreateNewChat}
                   isSidebarCollapsed={isSidebarCollapsed}
                   onMessageSent={handleMessageSent}
                   onBatchMessagesLoaded={handleBatchMessagesLoaded}

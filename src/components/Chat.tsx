@@ -186,6 +186,9 @@ const Chat: React.FC<ChatProps> = ({
   const [initialModel, setInitialModel] = useState<AIModel>(AIModel.STAR);
   const [initialSearchEnabled, setInitialSearchEnabled] = useState(false);
 
+  // 🔥 模型切换时保留选择的ref，防止useEffect重置
+  const modelSwitchRef = useRef<{ model: AIModel; search: boolean } | null>(null);
+
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -415,11 +418,21 @@ const Chat: React.FC<ChatProps> = ({
       setSelectedModel(sessionModel);
       setSearchEnabled(sessionSearch); // 🔥 这里会显示搜索状态指示器
     } else {
-      // 新对话，使用默认设置
-      setInitialModel(AIModel.STAR);
-      setInitialSearchEnabled(false);
-      setSelectedModel(AIModel.STAR);
-      setSearchEnabled(false);
+      // 新对话：检查是否是模型切换触发的
+      if (modelSwitchRef.current) {
+        const { model, search } = modelSwitchRef.current;
+        modelSwitchRef.current = null;
+        setInitialModel(model);
+        setInitialSearchEnabled(search);
+        setSelectedModel(model);
+        setSearchEnabled(search);
+      } else {
+        // 普通新对话，使用默认设置
+        setInitialModel(AIModel.STAR);
+        setInitialSearchEnabled(false);
+        setSelectedModel(AIModel.STAR);
+        setSearchEnabled(false);
+      }
     }
   }, [currentSession]);
 
@@ -1008,6 +1021,8 @@ const Chat: React.FC<ChatProps> = ({
   // 🔥 确认模型切换
   const confirmModelChange = () => {
     if (pendingModel && onCreateNewChat) {
+      // 保存切换目标到ref，防止useEffect重置
+      modelSwitchRef.current = { model: pendingModel, search: searchEnabled };
       onCreateNewChat(pendingModel, searchEnabled);
     }
     setShowModelConfirm(false);
@@ -1017,6 +1032,8 @@ const Chat: React.FC<ChatProps> = ({
   // 🔥 确认搜索设置切换
   const confirmSearchChange = () => {
     if (pendingSearch !== null && onCreateNewChat) {
+      // 保存切换目标到ref，防止useEffect重置
+      modelSwitchRef.current = { model: selectedModel, search: pendingSearch };
       onCreateNewChat(selectedModel, pendingSearch);
     }
     setShowSearchConfirm(false);

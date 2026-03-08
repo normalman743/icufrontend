@@ -9,6 +9,7 @@ interface ChatPageProps {
   currentSessionId: string | null;
   onCreateNewSession: (firstMessage: string, fileTokens?: string[], model?: AIModel) => Promise<string>;
   onAddMessage: (sessionId: string, message: ChatMessage) => Promise<void>;
+  onCreateNewChat?: (model?: AIModel, searchEnabled?: boolean) => void; // 🔥 模型/搜索切换时创建新对话
   isSidebarCollapsed?: boolean;
   onMessageSent?: (message: ChatMessage) => void;
   onBatchMessagesLoaded?: (sessionId: string, messages: ChatMessage[]) => void; // 🔥 新增批量消息回调
@@ -22,6 +23,7 @@ const ChatPage: React.FC<ChatPageProps> = ({
   currentSessionId,
   onCreateNewSession,
   onAddMessage,
+  onCreateNewChat, // 🔥 模型/搜索切换时创建新对话
   isSidebarCollapsed,
   onMessageSent,
   onBatchMessagesLoaded, // 🔥 新增
@@ -196,6 +198,7 @@ const ChatPage: React.FC<ChatPageProps> = ({
     <Chat
       currentSession={currentSession}
       onSendMessage={handleSendMessage}
+      onCreateNewChat={onCreateNewChat} // 🔥 传递模型切换创建新对话回调
       isLoading={isChatLoading && loadingChatId === currentSessionId}
       isSidebarCollapsed={isSidebarCollapsed}
       onMessageSent={onMessageSent}
