@@ -52,7 +52,7 @@ const i18nTexts = {
     // 关于页面
     aboutTitle: '关于 iCU',
     appName: 'iCU 智能学习助手',
-    version: '版本 1.0.0',
+    version: `版本 ${process.env.REACT_APP_VERSION || '1.0.0'}`,
     appDescription: 'iCU 是一个智能学习助手，旨在为学生提供个性化的学习体验和智能问答服务。',
     systemInfo: '系统信息',
     buildTime: '构建时间：',
@@ -113,7 +113,7 @@ const i18nTexts = {
     // 关于页面
     aboutTitle: 'About iCU',
     appName: 'iCU Intelligent Learning Assistant',
-    version: 'Version 1.0.0',
+    version: `Version ${process.env.REACT_APP_VERSION || '1.0.0'}`,
     appDescription: 'iCU is an intelligent learning assistant designed to provide students with personalized learning experiences and intelligent Q&A services.',
     systemInfo: 'System Information',
     buildTime: 'Build Time:',
