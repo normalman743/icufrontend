@@ -1,0 +1,359 @@
+{
+  "chat": {
+    "mainGreeting": "I See U！我是Intelligent CU，您的AI学习助手",
+    "randomGreetings": [
+      "准备好开始学习之旅了吗？",
+      "有什么我可以帮助您的吗？",
+      "让我们一起探索知识的海洋",
+      "今天想学习什么新内容呢？",
+      "我在这里随时为您提供帮助"
+    ],
+    "messageSuggestions": [
+      "本周香港天气怎么样？",
+      "CSCI3100这门课难不难？",
+      "NA体育馆在哪里？开放时间是什么？",
+      "深度学习领域最近有什么重大突破？",
+      "比较一下CSCI3100和CSCI3160，应该选哪个？",
+      "如何规划计算机专业的选课路径？",
+      "用Python写一个快速排序算法",
+      "我的C++作业编译报错，帮我看看哪里错了",
+      "CUHK的CSCI课程主要用什么编程语言？"
+    ],
+    "inputPlaceholder": "How can I help you?",
+    "uploadFile": "上传文件",
+    "removeFile": "删除文件",
+    "addFile": "添加文件",
+    "cancel": "取消",
+    "addToChat": "添加到聊天框",
+    "dropFileHint": "释放文件以上传",
+    "sources": "来源",
+    "fileSize": "大小",
+    "fileName": "文件名",
+    "deepSearch": "深度搜索",
+    "deepSearchTooltip": "启用知识库深度搜索功能",
+    "modelSwitchConfirm": "切换模型需要创建新对话，是否继续？",
+    "searchToggleConfirm": "修改搜索设置需要创建新对话，是否继续？",
+    "createNewChatWithModel": "是否创建新对话并使用该模型？",
+    "createNewChatWithSearch": "是否创建新对话并开启深度搜索功能？",
+    "createNewChatWithoutSearch": "是否创建新对话并取消深度搜索功能？",
+    "confirm": "确认",
+    "cancelAction": "取消",
+    "randomQuestion": "随机填入一个问题",
+    "creatingChat": "正在创建聊天...",
+    "closeDeepSearch": "关闭深度搜索"
+  },
+  "courseChat": {
+    "backToCourses": "← 返回课程",
+    "aiAssistantOnline": "AI助手在线",
+    "ragPanel": "RAG",
+    "expandRagPanel": "展开RAG面板",
+    "collapseRagPanel": "收起RAG面板",
+    "selectFilesForRag": "选择课程文件启用RAG检索",
+    "manageRagFiles": "管理RAG文件",
+    "ragEnabled": "RAG检索已启用",
+    "selectedFiles": "已选择",
+    "filesCount": "个文件",
+    "clickRagBadge": "点击RAG徽章管理文件",
+    "selectCourseFiles": "选择课程文件启用RAG检索",
+    "clearSelection": "清空选择",
+    "noFiles": "暂无文件",
+    "courseAIAssistant": "课程AI助手",
+    "enableRagSearch": "🔍 启用RAG检索增强问答",
+    "sendMessage": "发送消息",
+    "bytes": "字节",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "welcomeGreetings": [
+      "欢迎来到《{{courseName}}》课程AI助手！",
+      "准备好开始《{{courseName}}》的学习之旅了吗？",
+      "我是您的《{{courseName}}》专属学习助手",
+      "让我们一起探索《{{courseName}}》的知识世界",
+      "有任何关于《{{courseName}}》的问题都可以问我"
+    ],
+    "aiResponsePrefix": "基于《{{courseName}}》课程内容，我来为您解答：",
+    "ragResultsPrefix": "🔍 RAG检索结果 - 基于以下课程文件：",
+    "inputPlaceholder": "向《{{courseName}}》AI助手提问...",
+    "invalidCourseName": "课程名称无效",
+    "sendMessageFailed": "发送消息失败",
+    "loadCourseFilesFailed": "加载课程文件失败",
+    "newChat": "新建聊天",
+    "createNewChat": "创建新聊天",
+    "newChatWelcome": "欢迎开始与《{{courseName}}》AI助手的新对话！请输入您的问题。",
+    "modelStar": "适用于多数任务",
+    "modelStarPlus": "顶级长推理",
+    "modelStarCode": "优化编程和现实任务",
+    "loadingFiles": "加载课程文件中...",
+    "uploadFilesFirst": "请先在课程页面上传文件",
+    "downloadFile": "下载文件",
+    "selectFilesHint": "点击📁按钮选择课程文件，启用RAG检索增强问答",
+    "loadSessionError": "加载会话失败，请试发送一条消息开始对话",
+    "createNewChatFailed": "创建新聊天失败，请重试",
+    "userAlt": "用户",
+    "aiAssistantAlt": "AI助手"
+  },
+  "sidebar": {
+    "newChat": "新建对话",
+    "courseManagement": "课程管理",
+    "apiTest": "API测试",
+    "settings": "设置",
+    "chatHistory": "历史聊天",
+    "noChatHistory": "暂无聊天记录",
+    "loadMore": "滚动加载更多...",
+    "selectSemester": "选择学期",
+    "otherSemesters": "其他学期",
+    "allSemesters": "所有学期",
+    "online": "在线",
+    "expandSidebar": "展开侧边栏",
+    "collapseSidebar": "折叠侧边栏",
+    "semesterFormat": {
+      "t1": "T1",
+      "t2": "T2",
+      "other": "其他学期"
+    },
+    "renameChat": "重命名",
+    "deleteChat": "删除",
+    "confirmDelete": "确定要删除这个对话吗？",
+    "renamePlaceholder": "输入新的对话标题...",
+    "loading": "加载中...",
+    "loadError": "加载失败",
+    "user": "用户",
+    "admin": "管理员",
+    "unknownSemester": "未知学期",
+    "adminPanel": "管理员面板",
+    "creating": "创建中...",
+    "created": "创建成功！",
+    "loadingChatHistory": "加载聊天记录中...",
+    "loadingChatHistoryDesc": "请稍候，正在获取您的聊天历史",
+    "deleting": "删除中...",
+    "userAvatar": "用户头像",
+    "yesterday": "昨天",
+    "daysAgo": "{{days}}天前",
+    "semesterCount": "共 {{count}} 个学期"
+  },
+  "settings": {
+    "profile": "个人资料",
+    "preferences": "偏好设置",
+    "privacy": "隐私安全",
+    "about": "关于",
+    "theme": "主题",
+    "lightMode": "浅色模式",
+    "darkMode": "深色模式",
+    "language": "语言设置",
+    "displayLanguage": "显示语言",
+    "simplifiedChinese": "简体中文",
+    "english": "English",
+    "profileTitle": "个人资料",
+    "avatar": "头像",
+    "name": "姓名",
+    "email": "邮箱",
+    "edit": "修改",
+    "save": "保存",
+    "cancel": "取消",
+    "nameReadOnly": "用户名不可修改",
+    "emailReadOnly": "邮箱地址由系统管理",
+    "preferencesTitle": "偏好设置",
+    "appearanceSettings": "外观设置",
+    "languageSettings": "语言设置",
+    "privacyTitle": "隐私安全",
+    "passwordSecurity": "密码安全",
+    "changePassword": "修改密码",
+    "dataManagement": "数据管理",
+    "logout": "登出",
+    "passwordChangeDisabled": "密码修改功能暂时不可用",
+    "passwordManagedBySystem": "密码由系统管理员统一管理",
+    "aboutTitle": "关于 iCU",
+    "appName": "iCU 智能学习助手",
+    "version": "版本 {{version}}",
+    "appDescription": "iCU 是一个智能学习助手，旨在为学生提供个性化的学习体验和智能问答服务。",
+    "systemInfo": "系统信息",
+    "buildTime": "构建时间：",
+    "techStack": "技术栈：",
+    "registrationTime": "注册时间：",
+    "helpAndSupport": "帮助与支持",
+    "userManual": "用户手册",
+    "contactSupport": "联系支持",
+    "reportIssue": "报告问题",
+    "buildTimeValue": "2025-6-18",
+    "techStackValue": "React + TypeScript",
+    "loggingOut": "正在登出..."
+  },
+  "userManual": {
+    "title": "用户手册",
+    "navItems": {
+      "userManual": "📖 用户手册",
+      "contactSupport": "📧 联系支持",
+      "reportIssue": "🐛 报告问题"
+    },
+    "quickStart": {
+      "title": "用户手册",
+      "subtitle1": "1. 快速开始",
+      "tableHeaders": {
+        "step": "步骤",
+        "operation": "操作",
+        "description": "说明"
+      },
+      "steps": [
+        {
+          "step": "① 打开 iCU",
+          "operation": "访问 https://icu.cuhk.edu.hk（校园网推荐）",
+          "description": "浏览器建议：Chrome/Edge/Firefox 最新版"
+        },
+        {
+          "step": "② 注册 / 登录",
+          "operation": "使用 CUHK 统一身份或邀请码注册，新用户需填写 学号、电邮、邀请码",
+          "description": "登录后系统会自动生成 JWT Token 以保持登录状态"
+        },
+        {
+          "step": "③ 创建聊天",
+          "operation": "点击侧边栏 \"新建对话\" 按钮",
+          "description": "问任何学习相关问题。普通聊天暂不支持 RAG，如需 RAG，请在课程管理中进入相应课程并创建\"课程聊天\""
+        },
+        {
+          "step": "④ 上传文件",
+          "operation": "在 课程聊天 窗口点击 📎 或拖拽文件，可同时上传多份资料（用于 RAG 检索）",
+          "description": "支持 PDF、Word、图片、纯文本等"
+        },
+        {
+          "step": "⑤ 查看课程",
+          "operation": "侧边栏选择 \"课程管理\"",
+          "description": "可按学期查看/创建课程，上传讲义与作业"
+        },
+        {
+          "step": "⑥ 个性化设置",
+          "operation": "进入 设置 → 偏好设置",
+          "description": "支持浅/深色主题、语言切换与通知偏好"
+        }
+      ],
+      "subtitle2": "2. 功能详解",
+      "features": {
+        "smartChat": {
+          "title": "智能聊天",
+          "items": [
+            "支持实时流式响应。RAG（检索增强生成）仅在 课程聊天 中开启，并在回答下方展示引用来源；普通聊天暂不支持。",
+            "输入框 ⌘/Ctrl + Enter 快捷发送。",
+            "↑/↓ 可浏览历史提问并再次编辑。"
+          ]
+        },
+        "courseManagement": {
+          "title": "课程管理",
+          "items": [
+            "课程按学年/学期分组，可上传 大纲、讲座、作业 等文件。",
+            "每门课程拥有独立「课程专属聊天」，可聚焦授课内容。",
+            "删除课程会同步移除其文件与聊天记录，请谨慎操作。"
+          ]
+        },
+        "fileCenter": {
+          "title": "文件中心",
+          "items": [
+            "全局文件浏览器可按上传时间、课程或标签筛选。",
+            "图片与 PDF 内嵌预览，其他格式可下载到本地。"
+          ]
+        },
+        "billing": {
+          "title": "余额与计费",
+          "items": [
+            "在 设置 → 账户 可查看当前额度与历史花费。",
+            "消费单位：Token，每 1,000 Token 约 0.002 USD（示例）。",
+            "支持校园支付或信用卡充值。"
+          ]
+        }
+      },
+      "subtitle3": "3. 常见问题（FAQ）",
+      "faq": [
+        {
+          "question": "为什么上传的 PDF 解析失败？",
+          "answer": "请确认文件小于 40 MB，且未加密。若仍失败，可在「报告问题」里附带文件上传。"
+        },
+        {
+          "question": "可以多人共享同一门课程吗？",
+          "answer": "可，将他人的 CUHK 邮箱添加到课程 → 成员管理，即可共享课程文件与聊天。"
+        },
+        {
+          "question": "如何导出聊天记录？",
+          "answer": "在聊天窗口右上角 … 菜单选择 导出 Markdown/PDF。"
+        },
+        {
+          "question": "如何重置密码？",
+          "answer": "登录页点击 忘记密码，邮件将发送至你的 CUHK 邮箱。"
+        }
+      ]
+    },
+    "contact": {
+      "title": "联系支持",
+      "emailLabel": "邮件："
+    },
+    "report": {
+      "title": "报告问题",
+      "subtitle1": "1. 提交 Bug 的最佳实践",
+      "bestPractices": [
+        "打开设置页 → 报告问题 → 点击 \"创建工单\"。",
+        "填写表单：",
+        "点击提交后，你将收到工单编号（#INC-xxxx）。",
+        "可在「我的工单」查看处理进度与开发者回复。"
+      ],
+      "formDetails": [
+        "标题：一句话概括问题，如「上传 PDF 卡住在 99%」。",
+        "描述：详细步骤（重现路径）、期望结果、实际结果。",
+        "环境信息：操作系统、浏览器版本 / 移动端型号。",
+        "附件：截图 / 屏录 / 出错文件。"
+      ],
+      "subtitle2": "2. 问题分类",
+      "categoryHeader": "分类",
+      "exampleHeader": "示例",
+      "categories": [
+        { "type": "功能故障", "example": "聊天无法加载、文件无法预览" },
+        { "type": "性能问题", "example": "页面明显卡顿、响应慢" },
+        { "type": "兼容性问题", "example": "在 Safari 14 输入框失焦" },
+        { "type": "安全问题", "example": "XSS、越权访问" },
+        { "type": "建议/新功能", "example": "添加 Latex 渲染、支持批量导出" }
+      ],
+      "subtitle3": "3. 处理 SLA（服务等级协议）",
+      "slaHeaders": {
+        "level": "严重级别",
+        "description": "描述",
+        "response": "首次响应",
+        "target": "目标修复"
+      },
+      "slaData": [
+        {
+          "level": "P0 紧急",
+          "description": "影响全部用户核心功能（无法登录/聊天）",
+          "response": "2 小时",
+          "target": "24 小时内临时修复"
+        },
+        {
+          "level": "P1 高",
+          "description": "影响部分用户或重要功能",
+          "response": "4 小时",
+          "target": "3 个工作日"
+        },
+        {
+          "level": "P2 中",
+          "description": "一般错误或 UI 问题",
+          "response": "1 个工作日",
+          "target": "下次迭代"
+        },
+        {
+          "level": "P3 低",
+          "description": "文案/样式问题，或功能建议",
+          "response": "2 个工作日",
+          "target": "计划排期"
+        }
+      ],
+      "updateHistory": "更新记录",
+      "updateHeaders": {
+        "version": "版本",
+        "date": "日期",
+        "description": "说明"
+      },
+      "updateData": [
+        {
+          "version": "v1.0",
+          "date": "2025‑07‑05",
+          "description": "首版创建，涵盖用户手册、支持与问题报告"
+        }
+      ]
+    }
+  }
+}

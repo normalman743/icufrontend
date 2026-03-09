@@ -10,8 +10,8 @@ import ApiTestPage from './pages/ApiTestPage';
 import CourseChat from './components/CourseChat';
 import WelcomePage from './pages/WelcomePage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ChatSession, ChatMessage, Course, Semester, AIModel } from './types';
-import { chatAPI, courseAPI, semesterAPI } from './utils/api';
+import { ChatSession, ChatMessage, AIModel } from './types';
+import { chatAPI } from './utils/api';
 import './App.css';
 import AdminPage from './pages/AdminPage';
 
@@ -38,8 +38,6 @@ const AppContent: React.FC = () => {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [selectedSemester, setSelectedSemester] = useState<string>('all');
-  const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
 
   // 🔥 新增：右侧聊天加载状态
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -55,33 +53,7 @@ const AppContent: React.FC = () => {
   // 从用户偏好中获取语言设置
   const userLanguage = user?.preferred_language || 'zh_CN';
 
-  // 加载学期数据
-  useEffect(() => {
-    const loadSemesters = async () => {
-      try {
-        const response = await semesterAPI.getSemesters();
-        setSemesters(response.semesters);
-      } catch (error) {
-        console.error('加载学期失败:', error);
-      }
-    };
-
-    loadSemesters();
-  }, []);
-
-  // 加载课程数据
-  useEffect(() => {
-    const loadCourses = async () => {
-      try {
-        const response = await courseAPI.getCourses();
-        setCourses(response.courses);
-      } catch (error) {
-        console.error('加载课程失败:', error);
-      }
-    };
-
-    loadCourses();
-  }, [selectedSemester]);
+  // 学期和课程数据由 Sidebar 和 CoursesPage 各自加载，这里不再重复请求
 
   // 处理聊天列表加载
   const handleChatListLoaded = (sessions: ChatSession[]) => {

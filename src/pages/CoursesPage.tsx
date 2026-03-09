@@ -279,19 +279,8 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
 
   const courseResources = getCourseResources();
 
-  // 加载学期数据
-  useEffect(() => {
-    const loadSemesters = async () => {
-      try {
-        const response = await semesterAPI.getSemesters();
-        setSemesters(response.semesters);
-      } catch (error) {
-        console.error(t.loadError + ':', error);
-      }
-    };
-
-    loadSemesters();
-  }, []);
+  // 不再单独请求 semesters API —— 从 courses 的 semester 字段中提取学期信息
+  // Sidebar 已经加载了 semesters，这里只需要用 courses 自带的 semester 数据即可
 
   // 加载课程数据 - 根据选择的学期过滤
   useEffect(() => {
@@ -338,10 +327,10 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
     loadCourses();
   }, [selectedSemester]); // 移除 t 依赖，避免不必要的重新加载
 
-  // 重构文件加载函数 - 支持增量加载
+  // 重构文件加载函数 - 使用批量 API 一次获取所有文件夹及其文件
   const loadCourseFiles = async (courseId: string) => {
     try {
-      console.log(`开始加载课程 ${courseId} 的文件夹`);
+      console.log(`开始加载课程 ${courseId} 的资源（批量API）`);
       
       // 初始化所有文件夹的加载状态
       setCourseFiles(prev => ({
@@ -352,31 +341,36 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
         }), {})
       }));
       
-      // 获取课程文件夹
-      const foldersResponse = await folderAPI.getCourseFolders(parseInt(courseId));
-      console.log(`课程 ${courseId} 文件夹:`, foldersResponse.folders);
+      // 一次请求获取所有文件夹及其文件
+      const resourcesResponse = await folderAPI.getCourseResources(parseInt(courseId));
+      console.log(`课程 ${courseId} 资源:`, resourcesResponse.folders?.length || 0, '个文件夹');
       
-      // 为每个文件夹独立加载文件
-      foldersResponse.folders.forEach(folder => {
-        loadFolderFiles(courseId, folder.folder_type, folder.id, folder.name);
-      });
+      // 一次性更新所有文件夹的状态
+      const newFolderStates: { [sectionId: string]: FolderState } = {};
       
-      // 设置没有对应文件夹的资源类型为完成状态
-      const existingFolderTypes = new Set(foldersResponse.folders.map(f => f.folder_type));
+      // 先把所有资源类型初始化为空
       courseResources.forEach(resource => {
-        if (!existingFolderTypes.has(resource.id)) {
-          setCourseFiles(prev => ({
-            ...prev,
-            [courseId]: {
-              ...prev[courseId],
-              [resource.id]: { loading: false, error: null, files: [] }
-            }
-          }));
-        }
+        newFolderStates[resource.id] = { loading: false, error: null, files: [] };
       });
+      
+      // 用 API 返回的数据填充
+      if (resourcesResponse.folders) {
+        for (const folder of resourcesResponse.folders) {
+          newFolderStates[folder.folder_type] = {
+            loading: false,
+            error: null,
+            files: folder.files || []
+          };
+        }
+      }
+      
+      setCourseFiles(prev => ({
+        ...prev,
+        [courseId]: newFolderStates
+      }));
       
     } catch (error) {
-      console.error(`加载课程 ${courseId} 文件夹失败:`, error);
+      console.error(`加载课程 ${courseId} 资源失败:`, error);
       
       // 设置所有文件夹为错误状态
       setCourseFiles(prev => ({
@@ -389,47 +383,6 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
             files: [] 
           }
         }), {})
-      }));
-    }
-  };
-
-  // 新增：独立的文件夹文件加载函数
-  const loadFolderFiles = async (courseId: string, folderType: string, folderId: number, folderName: string) => {
-    try {
-      console.log(`=== 加载文件夹 ${folderName} (ID: ${folderId}) 的文件 ===`);
-      
-      const filesResponse = await folderAPI.getFolderFiles(folderId);
-      console.log(`文件夹 ${folderName} API 响应:`, JSON.stringify(filesResponse, null, 2));
-      
-      // 立即更新该文件夹的状态
-      setCourseFiles(prev => ({
-        ...prev,
-        [courseId]: {
-          ...prev[courseId],
-          [folderType]: {
-            loading: false,
-            error: null,
-            files: filesResponse.files || []
-          }
-        }
-      }));
-      
-      console.log(`文件夹 ${folderName} (${folderType}) 文件加载完成: ${filesResponse.files?.length || 0} 个文件`);
-      
-    } catch (error) {
-      console.warn(`加载文件夹 ${folderName} 文件失败:`, error);
-      
-      // 设置该文件夹的错误状态
-      setCourseFiles(prev => ({
-        ...prev,
-        [courseId]: {
-          ...prev[courseId],
-          [folderType]: {
-            loading: false,
-            error: error instanceof Error ? error.message : '加载失败',
-            files: []
-          }
-        }
       }));
     }
   };
@@ -980,12 +933,19 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
     setSelectedResource(resourceId);
   };
 
-  // 获取当前学期名称
+  // 获取当前学期名称 - 从 courses 中已有的 semester 字段提取
   const getCurrentSemesterName = () => {
     if (selectedSemester === 'all') {
       return t.allSemesters;
     }
     
+    // 从已加载的 courses 中查找匹配学期
+    const courseWithSemester = courses.find(c => c.semester_id?.toString() === selectedSemester);
+    if (courseWithSemester?.semester) {
+      return courseWithSemester.semester.name;
+    }
+    
+    // 如果当前筛选下没有课程，尝试从 semesters 数组（如果有的话）
     const semester = semesters.find(s => s.id.toString() === selectedSemester);
     if (semester) {
       return semester.name;

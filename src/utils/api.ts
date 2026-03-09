@@ -24,6 +24,7 @@ import {
   GlobalFileUploadResponse,
   FolderFilesResponse,
   CourseFoldersResponse,
+  CourseResourcesResponse,
   CourseListResponse,
   SemesterListResponse,
   ChatListResponse,
@@ -104,13 +105,6 @@ const default_users = {
   }
 };
 
-console.log('=== API配置信息 (硬编码测试) ===');
-console.log('原始 REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
-console.log('原始 REACT_APP_USE_MOCK_API:', process.env.REACT_APP_USE_MOCK_API);
-console.log('原始 REACT_APP_USE_MOCK_API 类型:', typeof process.env.REACT_APP_USE_MOCK_API);
-console.log('USE_MOCK_API (硬编码):', USE_MOCK_API);
-console.log('API_BASE_URL (硬编码):', API_BASE_URL);
-console.log('默认用户配置:', default_users);
 
 // 获取认证token
 const getAuthToken = (): string | null => {
@@ -252,22 +246,11 @@ const apiRequestWithRetry = async <T>(
 // 认证API - 统一响应处理
 export const authAPI = {
   async login(data: LoginRequest): Promise<AuthResponse> {
-    console.log('=== API层登录调试信息 ===');
-    console.log('USE_MOCK_API:', USE_MOCK_API);
-    console.log('API_BASE_URL:', API_BASE_URL);
-    console.log('完整请求URL:', `${API_BASE_URL}/auth/login`);
-    console.log('用户名:', `"${data.username}"`);
-    console.log('密码:', `"${data.password}"`);
-    console.log('密码长度:', data.password.length);
-    console.log('密码字符码:', Array.from(data.password).map(c => c.charCodeAt(0)));
-    console.log('发送的完整JSON:', JSON.stringify(data, null, 2));
     
     if (USE_MOCK_API) {
-      console.log('使用模拟API');
       return mockAPI.login(data);
     }
     
-    console.log('使用真实API，准备发送请求...');
     
     try {
       const response = await apiRequest<AuthResponse>('/auth/login', {
@@ -275,11 +258,9 @@ export const authAPI = {
         body: JSON.stringify(data),
       });
       
-      console.log('登录响应成功:', response);
       
       if (response.access_token) {
         setAuthToken(response.access_token);
-        console.log('Token已保存到localStorage');
       }
       
       return response;
@@ -295,12 +276,6 @@ export const authAPI = {
   },
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    console.log('=== API层注册调试信息 ===');
-    console.log('注册用户名:', `"${data.username}"`);
-    console.log('注册密码:', `"${data.password}"`);
-    console.log('注册密码长度:', data.password.length);
-    console.log('注册密码字符码:', Array.from(data.password).map(c => c.charCodeAt(0)));
-    console.log('发送的JSON:', JSON.stringify(data));
     
     if (USE_MOCK_API) {
       return mockAPI.register(data);
@@ -312,7 +287,6 @@ export const authAPI = {
         body: JSON.stringify(data),
       });
       
-      console.log('注册响应成功:', response);
       return response;
     } catch (error) {
       console.error('注册API错误:', error);
@@ -378,9 +352,6 @@ export const chatAPI = {
       return mockAPI.createChat(data);
     }
     
-    console.log('=== 创建聊天API调试 ===');
-    console.log('创建聊天数据:', JSON.stringify(data, null, 2));
-    console.log('API端点:', '/chats');
     
     // 🔥 验证必需参数
     if (!data.chat_type) {
@@ -428,10 +399,6 @@ export const chatAPI = {
       return mockAPI.sendMessage(chatId, data);
     }
     
-    console.log('=== 发送消息API调试 ===');
-    console.log('聊天ID:', chatId);
-    console.log('消息数据:', JSON.stringify(data, null, 2));
-    console.log('API端点:', `/chats/${chatId}/messages`);
     
     return apiRequest<SendMessageResponse>(`/chats/${chatId}/messages`, {
       method: 'POST',
@@ -498,7 +465,7 @@ export const chatAPI = {
     onMessage: (message: any) => void
   ): Promise<void> {
     const token = getAuthToken();
-    const url = `${API_BASE_URL}/chats/${chatId}/messages/stream`;
+    const url = `${API_BASE_URL}/chats/${chatId}/messages`;
     
     const response = await fetch(url, {
       method: 'POST',
@@ -506,7 +473,7 @@ export const chatAPI = {
         'Content-Type': 'application/json',
         ...(token && { 'Authorization': `Bearer ${token}` }),
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, stream: true }),
     });
 
     if (!response.ok) {
@@ -561,7 +528,7 @@ export const chatAPI = {
     onMessage: (message: any) => void
   ): Promise<CreateChatResponse> {
     const token = getAuthToken();
-    const url = `${API_BASE_URL}/chats/stream`;
+    const url = `${API_BASE_URL}/chats`;
     
     const response = await fetch(url, {
       method: 'POST',
@@ -569,7 +536,7 @@ export const chatAPI = {
         'Content-Type': 'application/json',
         ...(token && { 'Authorization': `Bearer ${token}` }),
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, stream: true }),
     });
 
     if (!response.ok) {
@@ -584,38 +551,50 @@ export const chatAPI = {
     const decoder = new TextDecoder();
     let chat: Chat | null = null;
     let aiMessage: ChatMessage | null = null;
+    let buffer = '';
     
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          if (data === '[DONE]') {
-            return {
-              chat: chat!,
-              ai_message: aiMessage || undefined,
-            };
-          }
-          
-          try {
-            const message = JSON.parse(data);
-            onMessage(message);
-            
-            if (message.type === 'chat_created') {
-              chat = message.data.chat;
-            } else if (message.type === 'ai_end') {
-              aiMessage = message.data.ai_message;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') {
+              return {
+                chat: chat!,
+                ai_message: aiMessage || undefined,
+              };
             }
-          } catch (error) {
-            console.error('解析SSE消息失败:', error);
+            
+            try {
+              const message = JSON.parse(data);
+              onMessage(message);
+              
+              if (message.type === 'chat_created') {
+                chat = message.data.chat;
+                // Backend sends ai_message in same event
+                if (message.data.ai_message) {
+                  aiMessage = message.data.ai_message;
+                }
+              } else if (message.type === 'ai_end' || message.type === 'completion') {
+                if (message.data?.ai_message) {
+                  aiMessage = message.data.ai_message;
+                }
+              }
+            } catch (error) {
+              // Skip parse errors for incomplete chunks
+            }
           }
         }
       }
+    } finally {
+      reader.releaseLock();
     }
     
     return {
@@ -643,18 +622,13 @@ export const courseAPI = {
       return course;
     }
     
-    console.log('=== getCourse API调试 ===');
-    console.log('请求课程ID:', courseId);
-    console.log('API端点:', `/courses/${courseId}`);
     
     try {
       // 🔥 修复：使用 any 类型接收API响应，避免 TypeScript 类型错误
       const response = await apiRequest<any>(`/courses/${courseId}`);
-      console.log('getCourse API原始响应:', response);
       
       // 🔥 修复：处理可能的响应格式 {course: {...}} 或直接的课程对象
       const courseData = response.course || response;
-      console.log('提取的课程数据:', courseData);
       
       // 🔥 确保课程对象包含所有必需字段，并尝试多个可能的名称字段
       const course: Course = {
@@ -675,15 +649,6 @@ export const courseAPI = {
         ...courseData // 保留其他字段
       };
       
-      console.log('🔍 课程名称处理过程:');
-      console.log('- courseData.name:', courseData.name);
-      console.log('- courseData.course_name:', courseData.course_name);
-      console.log('- courseData.title:', courseData.title);
-      console.log('- courseData.code:', courseData.code);
-      console.log('- courseData.display_name:', courseData.display_name);
-      console.log('- courseData.courseName:', courseData.courseName);
-      console.log('- 最终 course.name:', course.name);
-      console.log('处理后的完整课程对象:', course);
       
       return course;
     } catch (error) {
@@ -698,19 +663,15 @@ export const courseAPI = {
     }
     
     try {
-      console.log('=== 创建课程 API 调试 ===');
-      console.log('发送数据:', JSON.stringify(data, null, 2));
       
       const response = await apiRequest<any>('/courses', {
         method: 'POST',
         body: JSON.stringify(data),
       });
       
-      console.log('创建课程原始响应:', response);
       
       // 处理可能的响应格式：{course: {...}} 或直接的课程对象
       const course = response.course || response;
-      console.log('提取的课程对象:', course);
       
       return course;
     } catch (error) {
@@ -807,7 +768,6 @@ export const folderAPI = {
     
     try {
       // 使用正确的API端点：GET /api/v1/courses/{course_id}/folders
-      console.log(`尝试获取课程 ${courseId} 的文件夹`);
       return await apiRequest<CourseFoldersResponse>(`/courses/${courseId}/folders`);
     } catch (error) {
       console.warn('获取课程文件夹失败，使用降级方案:', error);
@@ -880,6 +840,22 @@ export const folderAPI = {
       return { files: [] };
     }
   },
+
+  /**
+   * 一次性获取课程所有文件夹及其文件（替代 N+1 瀑布请求）
+   */
+  getCourseResources: async (courseId: number): Promise<CourseResourcesResponse> => {
+    if (USE_MOCK_API) {
+      return { folders: [] };
+    }
+
+    try {
+      return await apiRequest<CourseResourcesResponse>(`/courses/${courseId}/resources`);
+    } catch (error) {
+      console.warn(`获取课程 ${courseId} 资源失败，降级为逐文件夹加载:`, error);
+      return { folders: [] };
+    }
+  },
 };
 
 // 文件API - 增加超时和重试机制
@@ -899,18 +875,6 @@ export const fileAPI = {
     const additionalData: Record<string, string> = {};
     if (courseId) additionalData.course_id = courseId.toString();
     if (folderId) additionalData.folder_id = folderId.toString();
-    
-    // 添加详细的参数日志
-    console.log(`=== 文件上传API参数 ===`);
-    console.log(`文件名: ${file.name}`);
-    console.log(`课程ID: ${courseId}`);
-    console.log(`文件夹ID: ${folderId}`);
-    console.log(`附加数据:`, additionalData);
-    console.log(`FormData将包含:`, {
-      file: `[File: ${file.name}]`,
-      ...additionalData
-    });
-    console.log(`========================`);
     
     return uploadFileWithProgress(
       '/files/upload', 
@@ -1231,27 +1195,19 @@ const uploadFileWithProgress = async (
   formData.append('file', file);
   
   // 添加详细的FormData构建日志
-  console.log(`=== FormData 构建过程 ===`);
-  console.log(`基础文件添加: file = ${file.name}`);
   
   Object.entries(additionalData).forEach(([key, value]) => {
     formData.append(key, value);
-    console.log(`添加参数: ${key} = ${value}`);
   });
   
   // 验证FormData内容
-  console.log(`=== FormData 最终内容 ===`);
   const entries = Array.from(formData.entries());
   entries.forEach(([key, value]) => {
     if (value instanceof File) {
-      console.log(`${key}: [File: ${value.name}, size: ${value.size}]`);
     } else {
-      console.log(`${key}: ${value}`);
     }
   });
-  console.log(`==========================`);
   
-  console.log(`开始上传文件: ${file.name}, 大小: ${(file.size / 1024 / 1024).toFixed(2)}MB, 超时: 60秒`);
   
   onUploadStart?.();
   
@@ -1275,16 +1231,10 @@ const uploadFileWithProgress = async (
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const rawResponse = xhr.responseText;
-          console.log(`=== 上传响应原始数据 ===`);
-          console.log(`状态码: ${xhr.status}`);
-          console.log(`原始响应:`, rawResponse);
           
           const response = JSON.parse(rawResponse);
-          console.log(`解析后响应:`, JSON.stringify(response, null, 2));
           
           const finalData = response?.data || response;
-          console.log(`最终返回数据:`, JSON.stringify(finalData, null, 2));
-          console.log(`========================`);
           
           resolve(finalData);
         } catch (error) {
@@ -1324,8 +1274,6 @@ const uploadFileWithProgress = async (
       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     }
     
-    console.log(`发送POST请求到: ${url}`);
-    console.log(`请求头包含: Authorization: Bearer ${token ? '[有Token]' : '[无Token]'}`);
     
     // 发送请求
     xhr.send(formData);

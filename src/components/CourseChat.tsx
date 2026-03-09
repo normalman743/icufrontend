@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChatMessage, AIModel } from '../types'; // 🔥 确保导入了 AIModel
 import { useAuth } from '../contexts/AuthContext';
 import { chatAPI, courseAPI, folderAPI, fileAPI, semesterAPI } from '../utils/api';
+import MarkdownRenderer from './MarkdownRenderer';
 import './CourseChat.css';
 import { createPortal } from 'react-dom';
 
@@ -17,126 +20,6 @@ interface CourseFile {
   folderName?: string;
   folderType?: string;
 }
-
-// 国际化文本
-const i18nTexts = {
-  'zh_CN': {
-    // 页面标题和导航
-    backToCourses: '← 返回课程',
-    aiAssistantOnline: 'AI助手在线',
-    
-    // RAG相关
-    ragPanel: 'RAG',
-    expandRagPanel: '展开RAG面板',
-    collapseRagPanel: '收起RAG面板',
-    selectFilesForRag: '选择课程文件启用RAG检索',
-    manageRagFiles: '管理RAG文件',
-    ragEnabled: 'RAG检索已启用',
-    selectedFiles: '已选择',
-    filesCount: '个文件',
-    clickRagBadge: '点击RAG徽章管理文件',
-    
-    // 文件选择器
-    selectCourseFiles: '选择课程文件启用RAG检索',
-    clearSelection: '清空选择',
-    noFiles: '暂无文件',
-    
-    // 欢迎界面
-    courseAIAssistant: '课程AI助手',
-    enableRagSearch: '🔍 启用RAG检索增强问答',
-    
-    // 聊天相关
-    sendMessage: '发送消息',
-    
-    // 文件相关
-    bytes: '字节',
-    kb: 'KB',
-    mb: 'MB',
-    gb: 'GB',
-    
-    // 问候语
-    welcomeGreetings: [
-      '欢迎来到《{courseName}》课程AI助手！',
-      '准备好开始《{courseName}》的学习之旅了吗？',
-      '我是您的《{courseName}》专属学习助手',
-      '让我们一起探索《{courseName}》的知识世界',
-      '有任何关于《{courseName}》的问题都可以问我'
-    ],
-    
-    // AI回复
-    aiResponsePrefix: '基于《{courseName}》课程内容，我来为您解答：',
-    ragResultsPrefix: '🔍 RAG检索结果 - 基于以下课程文件：',
-    
-    // 输入提示
-    inputPlaceholder: '向《{courseName}》AI助手提问...',
-    
-    // 错误信息
-    invalidCourseName: '课程名称无效',
-    sendMessageFailed: '发送消息失败',
-    loadCourseFilesFailed: '加载课程文件失败',
-    newChat: '新建聊天',
-    createNewChat: '创建新聊天',
-    newChatWelcome: '欢迎开始与《{courseName}》AI助手的新对话！请输入您的问题。',
-  },
-  'en': {
-    // 页面标题和导航
-    backToCourses: '← Back to Courses',
-    aiAssistantOnline: 'AI Assistant Online',
-    
-    // RAG相关
-    ragPanel: 'RAG',
-    expandRagPanel: 'Expand RAG Panel',
-    collapseRagPanel: 'Collapse RAG Panel',
-    selectFilesForRag: 'Select course files to enable RAG retrieval',
-    manageRagFiles: 'Manage RAG files',
-    ragEnabled: 'RAG retrieval enabled',
-    selectedFiles: 'Selected',
-    filesCount: 'files',
-    clickRagBadge: 'Click RAG badge to manage files',
-    
-    // 文件选择器
-    selectCourseFiles: 'Select course files to enable RAG retrieval',
-    clearSelection: 'Clear Selection',
-    noFiles: 'No files',
-    
-    // 欢迎界面
-    courseAIAssistant: 'Course AI Assistant',
-    enableRagSearch: '🔍 Enable RAG Enhanced Q&A',
-    
-    // 聊天相关
-    sendMessage: 'Send Message',
-    
-    // 文件相关
-    bytes: 'Bytes',
-    kb: 'KB',
-    mb: 'MB',
-    gb: 'GB',
-    
-    // 问候语
-    welcomeGreetings: [
-      'Welcome to the 《{courseName}》 Course AI Assistant!',
-      'Ready to start your learning journey with 《{courseName}》?',
-      'I am your dedicated 《{courseName}》 learning assistant',
-      'Let\'s explore the knowledge world of 《{courseName}》 together',
-      'Feel free to ask me any questions about 《{courseName}》'
-    ],
-    
-    // AI回复
-    aiResponsePrefix: 'Based on the 《{courseName}》 course content, let me answer:',
-    ragResultsPrefix: '🔍 RAG Retrieval Results - Based on the following course files:',
-    
-    // 输入提示
-    inputPlaceholder: 'Ask the 《{courseName}》 AI assistant...',
-    
-    // 错误信息
-    invalidCourseName: 'Invalid course name',
-    sendMessageFailed: 'Failed to send message',
-    loadCourseFilesFailed: 'Failed to load course files',
-    newChat: 'New Chat',
-    createNewChat: 'Create New Chat',
-    newChatWelcome: 'Welcome to start a new conversation with the 《{courseName}》 AI assistant! Please enter your question.',
-  }
-};
 
 const CourseChat: React.FC = () => {
   const { user } = useAuth();
@@ -182,6 +65,10 @@ const CourseChat: React.FC = () => {
   const [allFiles, setAllFiles] = useState<any[]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
   
+  // SSE streaming state
+  const [streamingContent, setStreamingContent] = useState<string>('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  
   // 🔥 新增：完整的课程数据加载状态
   const [semesters, setSemesters] = useState<any[]>([]);
   const [allCourses, setAllCourses] = useState<any[]>([]);
@@ -198,80 +85,77 @@ const CourseChat: React.FC = () => {
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   
-  // 获取用户语言设置
-  const userLanguage = user?.preferred_language || 'zh_CN';
-  const t = i18nTexts[userLanguage] || i18nTexts['zh_CN'];
+  // i18n
+  const { t } = useTranslation();
 
-  // 🔥 新增：模型选择器组件 - 移动到组件内部但在所有 hooks 声明之后
-  const ModelSelector: React.FC = () => {
-    const models = [
-      { 
-        id: AIModel.STAR, 
-        name: 'Star', 
-        icon: '⭐',
-        description: userLanguage === 'zh_CN' ? '适用于多数任务' : 'Suitable for most tasks'
-      },
-      { 
-        id: AIModel.STAR_PLUS, 
-        name: 'StarPlus', 
-        icon: '🌟',
-        description: userLanguage === 'zh_CN' ? '顶级长推理' : 'Premium long reasoning'
-      },
-      { 
-        id: AIModel.STAR_CODE, 
-        name: 'StarCode', 
-        icon: '💻',
-        description: userLanguage === 'zh_CN' ? '优化编程和现实任务' : 'Optimized for coding and practical tasks'
-      }
-    ];
+  // 模型选择器 - memoized to avoid recreating every render
+  const modelSelectorModels = React.useMemo(() => [
+    { 
+      id: AIModel.STAR, 
+      name: 'Star', 
+      icon: '⭐',
+      description: t('courseChat.modelStar')
+    },
+    { 
+      id: AIModel.STAR_PLUS, 
+      name: 'StarPlus', 
+      icon: '🌟',
+      description: t('courseChat.modelStarPlus')
+    },
+    { 
+      id: AIModel.STAR_CODE, 
+      name: 'StarCode', 
+      icon: '💻',
+      description: t('courseChat.modelStarCode')
+    }
+  ], [t]);
 
-    const handleModelChange = (modelId: AIModel) => {
-      setSelectedModel(modelId);
-      setShowModelSelector(false);
-    };
+  const handleModelChange = useCallback((modelId: AIModel) => {
+    setSelectedModel(modelId);
+    setShowModelSelector(false);
+  }, []);
 
-    return (
-      <div className="course-chat-model-selector">
-        <button 
-          className="course-chat-model-trigger"
-          onClick={() => setShowModelSelector(!showModelSelector)}
-        >
-          <span className="course-chat-model-icon">
-            {models.find(m => m.id === selectedModel)?.icon}
-          </span>
-          <span className="course-chat-model-name">
-            {models.find(m => m.id === selectedModel)?.name}
-          </span>
-          <span className="course-chat-model-arrow">
-            {showModelSelector ? '▲' : '▼'}
-          </span>
-        </button>
-        
-        {showModelSelector && (
-          <div className="course-chat-model-dropdown">
-            {models.map(model => (
-              <button
-                key={model.id}
-                className={`course-chat-model-option ${
-                  selectedModel === model.id ? 'course-chat-model-option--active' : ''
-                }`}
-                onClick={() => handleModelChange(model.id)}
-              >
-                <span className="course-chat-model-option-icon">{model.icon}</span>
-                <div className="course-chat-model-option-info">
-                  <span className="course-chat-model-option-name">{model.name}</span>
-                  <span className="course-chat-model-option-description">{model.description}</span>
-                </div>
-                {selectedModel === model.id && (
-                  <span className="course-chat-model-option-check">✓</span>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const renderModelSelector = () => (
+    <div className="course-chat-model-selector">
+      <button 
+        className="course-chat-model-trigger"
+        onClick={() => setShowModelSelector(!showModelSelector)}
+      >
+        <span className="course-chat-model-icon">
+          {modelSelectorModels.find(m => m.id === selectedModel)?.icon}
+        </span>
+        <span className="course-chat-model-name">
+          {modelSelectorModels.find(m => m.id === selectedModel)?.name}
+        </span>
+        <span className="course-chat-model-arrow">
+          {showModelSelector ? '▲' : '▼'}
+        </span>
+      </button>
+      
+      {showModelSelector && (
+        <div className="course-chat-model-dropdown">
+          {modelSelectorModels.map(model => (
+            <button
+              key={model.id}
+              className={`course-chat-model-option ${
+                selectedModel === model.id ? 'course-chat-model-option--active' : ''
+              }`}
+              onClick={() => handleModelChange(model.id)}
+            >
+              <span className="course-chat-model-option-icon">{model.icon}</span>
+              <div className="course-chat-model-option-info">
+                <span className="course-chat-model-option-name">{model.name}</span>
+                <span className="course-chat-model-option-description">{model.description}</span>
+              </div>
+              {selectedModel === model.id && (
+                <span className="course-chat-model-option-check">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
   
   // 🔥 新增：缺失的工具函数
   const handleBackToCourses = () => {
@@ -280,9 +164,9 @@ const CourseChat: React.FC = () => {
 
   // 格式化文件大小
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return `0 ${t.bytes}`;
+    if (bytes === 0) return `0 ${t('courseChat.bytes')}`;
     const k = 1024;
-    const sizes = [t.bytes, t.kb, t.mb, t.gb];
+    const sizes = [t('courseChat.bytes'), t('courseChat.kb'), t('courseChat.mb'), t('courseChat.gb')];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
@@ -309,7 +193,6 @@ const CourseChat: React.FC = () => {
   // 🔥 新增：新建聊天功能 - 添加在工具函数之后
   const handleCreateNewChat = async () => {
     try {
-      console.log('=== 创建新的课程聊天 ===');
       
       // 清空当前状态
       setMessages([]);
@@ -318,11 +201,9 @@ const CourseChat: React.FC = () => {
       
       // 显示欢迎消息
       const welcomeMessage: ChatMessage = {
-        id: Date.now(),
+        id: -(Date.now() % 1000000000),
         chat_id: 0,
-        content: userLanguage === 'zh_CN' 
-          ? `欢迎开始与《${courseInfo?.name || '课程'}》AI助手的新对话！请输入您的问题。`
-          : `Welcome to start a new conversation with the 《${courseInfo?.name || 'Course'}》 AI assistant! Please enter your question.`,
+        content: t('courseChat.newChatWelcome', { courseName: courseInfo?.name || (i18n.language === 'zh_CN' ? '课程' : 'Course') }),
         role: 'assistant',
         model_name: null,
         tokens_used: null,
@@ -335,11 +216,10 @@ const CourseChat: React.FC = () => {
       
       setMessages([welcomeMessage]);
       
-      console.log('新聊天已创建，等待用户输入第一条消息');
       
     } catch (error) {
       console.error('创建新聊天失败:', error);
-      const errorText = userLanguage === 'zh_CN' ? '创建新聊天失败，请重试' : 'Failed to create new chat, please try again';
+      const errorText = t('courseChat.createNewChatFailed');
       alert(errorText);
     }
   };
@@ -357,25 +237,16 @@ const CourseChat: React.FC = () => {
   // 🔥 修复：从课程ID获取课程信息
   const loadCourseInfo = async () => {
     try {
-      console.log('=== 开始加载课程信息 ===');
-      console.log('courseId:', courseId);
-      console.log('courseName:', courseName);
       
       if (courseId) {
-        console.log('通过课程ID获取课程信息:', courseId);
         // 通过课程ID获取课程信息
         const apiResponse = await courseAPI.getCourse(parseInt(courseId));
-        console.log('课程API原始响应:', apiResponse);
         
         // 🔥 修复：处理可能的嵌套结构，使用 any 类型避免 TypeScript 错误
         const rawResponse = apiResponse as any;
         const course = rawResponse.course || rawResponse;
         
         // 🔥 新增：详细分析课程对象结构
-        console.log('🔍 完整课程对象分析:');
-        console.log('- 类型:', typeof course);
-        console.log('- 所有键:', Object.keys(course));
-        console.log('- 完整对象:', course);
         
         // 🔥 新增：查找所有可能包含名称的字段
         const possibleNameFields = [
@@ -383,12 +254,9 @@ const CourseChat: React.FC = () => {
           'subject', 'subject_name', 'course_title', 'full_name'
         ];
         
-        console.log('🔍 查找课程名称字段:');
         possibleNameFields.forEach(field => {
           if (course[field] !== undefined && course[field] !== null && course[field] !== '') {
-            console.log(`✅ 找到字段 ${field}:`, `"${course[field]}"`);
           } else {
-            console.log(`❌ 字段 ${field}:`, course[field]);
           }
         });
         
@@ -401,39 +269,31 @@ const CourseChat: React.FC = () => {
         // 第一优先级：明确的名称字段
         if (course.name && course.name !== '' && course.name !== courseIdNumber.toString()) {
           courseName = course.name;
-          console.log('✅ 使用 course.name:', courseName);
         } 
         // 第二优先级：course_name
         else if (course.course_name && course.course_name !== '' && course.course_name !== courseIdNumber.toString()) {
           courseName = course.course_name;
-          console.log('✅ 使用 course.course_name:', courseName);
         }
         // 第三优先级：title
         else if (course.title && course.title !== '' && course.title !== courseIdNumber.toString()) {
           courseName = course.title;
-          console.log('✅ 使用 course.title:', courseName);
         }
         // 第四优先级：subject 或 subject_name
         else if (course.subject && course.subject !== '' && course.subject !== courseIdNumber.toString()) {
           courseName = course.subject;
-          console.log('✅ 使用 course.subject:', courseName);
         }
         else if (course.subject_name && course.subject_name !== '' && course.subject_name !== courseIdNumber.toString()) {
           courseName = course.subject_name;
-          console.log('✅ 使用 course.subject_name:', courseName);
         }
         // 最后选择：代码字段（如果不是纯数字）
         else if (course.code && course.code !== '' && isNaN(Number(course.code))) {
           courseName = course.code;
-          console.log('✅ 使用 course.code:', courseName);
         }
         // 默认值
         else {
           courseName = `课程 ${courseIdNumber}`;
-          console.log('⚠️ 使用默认名称:', courseName);
         }
       
-        console.log('🔍 最终课程名称选择:', `"${courseName}"`);
         
         setCourseInfo({
           id: courseIdNumber, // 🔥 确保ID是数字
@@ -442,21 +302,13 @@ const CourseChat: React.FC = () => {
           description: course.description
         });
         
-        console.log('✅ 课程信息设置完成:', {
-          id: courseIdNumber,
-          name: courseName,
-          code: course.code,
-          originalResponse: apiResponse
-        });
       } else if (courseName) {
-        console.log('通过课程名称设置课程信息:', courseName);
         // 通过课程名称（解码）
         const decodedName = decodeURIComponent(courseName);
         setCourseInfo({
           name: decodedName
         });
         
-        console.log('课程信息设置完成:', { name: decodedName });
       } else {
         console.error('没有提供课程ID或课程名称');
         setCourseInfo(null);
@@ -472,7 +324,6 @@ const CourseChat: React.FC = () => {
             id: courseIdNumber,
             name: `课程 ${courseId}`
           });
-          console.log('使用降级方案设置课程信息:', { id: courseIdNumber, name: `课程 ${courseId}` });
         } else {
           console.error('无效的课程ID:', courseId);
           setCourseInfo(null);
@@ -502,37 +353,31 @@ const CourseChat: React.FC = () => {
   // 🔥 添加：输入框占位符函数
   const getInputPlaceholder = () => {
     const currentCourseName = getCurrentCourseName();
-    return t.inputPlaceholder.replace('{courseName}', currentCourseName);
+    return t('courseChat.inputPlaceholder', { courseName: currentCourseName });
   };
 
   // 🔥 修改：从真实API获取课程文件数据
   const loadCourseFiles = async () => {
     if (!courseInfo?.id) {
-      console.log('没有课程ID，跳过文件加载。courseInfo:', courseInfo);
       return [];
     }
 
     setLoadingResources(true);
     try {
-      console.log('=== 开始加载课程资源 ===');
-      console.log('课程ID:', courseInfo.id);
 
       // 1. 获取课程文件夹
       const foldersResponse = await folderAPI.getCourseFolders(courseInfo.id);
-      console.log('课程文件夹:', foldersResponse.folders);
       setCourseFolders(foldersResponse.folders);
 
       // 2. 获取所有文件（用于备选）
       try {
         const filesResponse = await fileAPI.getFiles();
-        console.log('所有文件:', filesResponse.files);
         
         // 过滤出属于当前课程的文件
         const courseFiles = filesResponse.files.filter(file => 
           file.course_id === courseInfo.id
         );
         setAllFiles(courseFiles);
-        console.log('当前课程文件:', courseFiles);
       } catch (error) {
         console.warn('获取文件列表失败:', error);
         setAllFiles([]);
@@ -545,7 +390,6 @@ const CourseChat: React.FC = () => {
       for (const folder of foldersResponse.folders) {
         try {
           const folderFilesResponse = await folderAPI.getFolderFiles(folder.id);
-          console.log(`文件夹 ${folder.name} 的文件:`, folderFilesResponse.files);
           
           folderFilesResponse.files.forEach(file => {
             files.push({
@@ -564,9 +408,6 @@ const CourseChat: React.FC = () => {
         }
       }
 
-      console.log('=== 课程资源加载完成 ===');
-      console.log('文件夹数量:', foldersResponse.folders.length);
-      console.log('文件数量:', files.length);
 
       return files;
     } catch (error) {
@@ -580,11 +421,6 @@ const CourseChat: React.FC = () => {
   // 🔥 修复：创建课程聊天函数 - 确保有有效的课程ID
   const createCourseChat = async (firstMessage: string): Promise<number> => {
     try {
-      console.log('=== 创建课程聊天 ===');
-      console.log('课程信息:', courseInfo);
-      console.log('首条消息:', firstMessage);
-      console.log('可用文件夹:', courseFolders);
-      console.log('可用文件:', allFiles);
 
       // 🔥 验证课程ID
       if (!courseInfo?.id || courseInfo.id <= 0) {
@@ -605,7 +441,6 @@ const CourseChat: React.FC = () => {
         const firstFileId = allFiles[0].id;
         if (firstFileId && firstFileId > 0) {
           fileIds.push(firstFileId);
-          console.log('自动选择文件:', allFiles[0].original_name);
         }
       }
 
@@ -614,12 +449,9 @@ const CourseChat: React.FC = () => {
         const firstFolderId = courseFolders[0].id;
         if (firstFolderId && firstFolderId > 0) {
           folderIds.push(firstFolderId);
-          console.log('自动选择文件夹:', courseFolders[0].name);
         }
       }
 
-      console.log('最终选择的文件ID:', fileIds);
-      console.log('最终选择的文件夹ID:', folderIds);
 
       // 🔥 验证必需的参数
       if (folderIds.length === 0) {
@@ -640,22 +472,16 @@ const CourseChat: React.FC = () => {
         stream: false
       };
 
-      console.log('创建聊天数据验证:');
-      console.log('- course_id (必需):', createChatData.course_id, typeof createChatData.course_id);
-      console.log('- folder_ids 长度:', createChatData.folder_ids.length);
-      console.log('- file_ids 长度:', createChatData.file_ids.length);
-      console.log('完整数据:', JSON.stringify(createChatData, null, 2));
 
       const response = await chatAPI.createChat(createChatData);
       
       if (response.chat) {
-        console.log('课程聊天创建成功:', response.chat);
         setCurrentChatId(response.chat.id);
         
         // 如果有AI回复，添加到消息列表
         if (response.ai_message) {
           const userMessage: ChatMessage = {
-            id: Date.now(),
+            id: -(Date.now() % 1000000000),
             chat_id: response.chat.id,
             content: firstMessage,
             role: 'user',
@@ -695,7 +521,6 @@ const CourseChat: React.FC = () => {
   const handleFilePreview = async (fileId: string) => {
     try {
       const preview = await fileAPI.getFilePreview(parseInt(fileId));
-      console.log('文件预览:', preview);
       // 可以在这里显示预览内容
     } catch (error) {
       console.error('获取文件预览失败:', error);
@@ -787,7 +612,7 @@ const CourseChat: React.FC = () => {
 
     // 添加用户消息到本地状态
     const userMessage: ChatMessage = {
-      id: Date.now(),
+      id: -(Date.now() % 1000000000),
       chat_id: currentChatId || 0,
       content: content,
       role: 'user',
@@ -814,46 +639,70 @@ const CourseChat: React.FC = () => {
           throw new Error('请至少选择一个文件');
         }
 
-        // 发送消息到现有聊天
+        // 发送消息到现有聊天 - SSE streaming
         const sendMessageData = {
           content: content,
-          ai_model: selectedModel, // 🔥 使用选择的模型：AIModel.STAR | AIModel.STAR_PLUS | AIModel.STAR_CODE
+          ai_model: selectedModel,
           search_enabled: true,
-          // 🔥 如果选择了文件，包含文件信息
           ...(selectedFiles.length > 0 && {
             file_ids: selectedFiles.map(f => parseInt(f.id)).filter(id => !isNaN(id)),
             folder_ids: courseFolders.map(folder => folder.id).filter(id => id)
           })
         };
 
-        console.log('发送消息数据:', sendMessageData);
-
-        const response = await chatAPI.sendMessage(chatId, sendMessageData);
+        setIsStreaming(true);
+        setStreamingContent('');
+        let finalAiMessage: ChatMessage | null = null;
         
-        // 处理AI响应
-        if (response.ai_message) {
-          setMessages(prev => [...prev, response.ai_message]);
+        await chatAPI.sendMessageStream(
+          chatId,
+          sendMessageData,
+          (event: any) => {
+            switch (event.type) {
+              case 'content':
+                setStreamingContent(prev => prev + (event.content || ''));
+                break;
+              case 'completion':
+                if (event.ai_message) {
+                  finalAiMessage = event.ai_message;
+                }
+                break;
+              case 'error':
+                throw new Error(event.error || '流式响应出错');
+            }
+          },
+          (error: Error) => {
+            throw error;
+          }
+        );
+        
+        // Stream finished - add final AI message and clear streaming state
+        setIsStreaming(false);
+        setStreamingContent('');
+        
+        if (finalAiMessage) {
+          setMessages(prev => [...prev, finalAiMessage!]);
         }
       }
     } catch (error) {
-      console.error(t.sendMessageFailed, error);
+      console.error(t('courseChat.sendMessageFailed'), error);
       
       // 🔥 修改：针对不同错误显示不同信息
-      let errorText = t.sendMessageFailed;
+      let errorText = t('courseChat.sendMessageFailed');
       if (error instanceof Error) {
         if (error.message.includes('请至少选择一个文件') || 
             error.message.includes('Please select at least one file')) {
-          errorText = userLanguage === 'zh_CN' ? '请至少选择一个文件' : 'Please select at least one file';
+          errorText = i18n.language === 'zh_CN' ? '请至少选择一个文件' : 'Please select at least one file';
         } else if (error.message.includes('网络请求失败')) {
-          errorText = userLanguage === 'zh_CN' ? '请至少选择一个文件' : 'Please select at least one file';
+          errorText = i18n.language === 'zh_CN' ? '请至少选择一个文件' : 'Please select at least one file';
         } else {
-          errorText = `${t.sendMessageFailed}: ${error.message}`;
+          errorText = `${t('courseChat.sendMessageFailed')}: ${error.message}`;
         }
       }
       
       // 发送失败时，显示错误消息
       const errorMessage: ChatMessage = {
-        id: Date.now() + 1,
+        id: -(Date.now() % 1000000000 + 1),
         chat_id: currentChatId || 0,
         content: errorText,
         role: 'assistant',
@@ -869,6 +718,8 @@ const CourseChat: React.FC = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      setIsStreaming(false);
+      setStreamingContent('');
     }
   };
 
@@ -876,12 +727,9 @@ const CourseChat: React.FC = () => {
   useEffect(() => {
     const initializeCourseData = async () => {
       if (!courseInfo || !courseInfo.id) {
-        console.log('课程信息未完全加载或缺少ID，跳过初始化。courseInfo:', courseInfo);
         return;
       }
       
-      console.log('=== 初始化课程数据 ===');
-      console.log('课程信息完整:', courseInfo);
       
       // 1. 加载课程文件
       const files = await loadCourseFiles();
@@ -907,14 +755,11 @@ const CourseChat: React.FC = () => {
         });
 
         if (courseChat) {
-          console.log('找到现有课程聊天:', courseChat);
           setCurrentChatId(courseChat.id);
           await loadChatMessages(courseChat.id);
         } else {
-          console.log('没有找到现有课程聊天，将在发送第一条消息时创建');
         }
       } catch (error) {
-        console.log('查找现有聊天失败:', error);
       }
     };
 
@@ -924,9 +769,7 @@ const CourseChat: React.FC = () => {
   // 🔥 修改：定义问候语 - 根据语言动态生成
   const getRandomGreeting = () => {
     const currentCourseName = getCurrentCourseName();
-    const greetings = t.welcomeGreetings.map(greeting => 
-      greeting.replace('{courseName}', currentCourseName)
-    );
+    const greetings = t('courseChat.welcomeGreetings', { returnObjects: true, courseName: currentCourseName }) as string[];
     const randomIndex = Math.floor(Math.random() * greetings.length);
     return greetings[randomIndex];
   };
@@ -936,7 +779,7 @@ const CourseChat: React.FC = () => {
     if (courseInfo) {
       setGreeting(getRandomGreeting());
     }
-  }, [courseInfo, userLanguage]);
+  }, [courseInfo, t]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1067,7 +910,7 @@ const CourseChat: React.FC = () => {
         <div className="course-chat-welcome-center">
           <div className="course-chat-welcome-logo">
             <div className="course-chat-welcome-logo-image">❌</div>
-            <span className="course-chat-welcome-logo-text">{t.invalidCourseName}</span>
+            <span className="course-chat-welcome-logo-text">{t('courseChat.invalidCourseName')}</span>
           </div>
         </div>
       </div>
@@ -1083,7 +926,7 @@ const CourseChat: React.FC = () => {
             className="course-chat-back-btn"
             onClick={handleBackToCourses}
           >
-            {t.backToCourses}
+            {t('courseChat.backToCourses')}
           </button>
           {/* 🔥 更新：顶部导航栏显示更多信息 */}
           <div className="course-chat-header-center">
@@ -1104,10 +947,10 @@ const CourseChat: React.FC = () => {
               <div 
                 className={`course-chat-rag-badge ${isRagPanelExpanded ? 'course-chat-rag-badge--expanded' : ''}`}
                 onClick={toggleRagPanel}
-                title={isRagPanelExpanded ? t.collapseRagPanel : t.expandRagPanel}
+                title={isRagPanelExpanded ? t('courseChat.collapseRagPanel') : t('courseChat.expandRagPanel')}
               >
                 <span className="course-chat-rag-icon">🔍</span>
-                <span className="course-chat-rag-text">{t.ragPanel}</span>
+                <span className="course-chat-rag-text">{t('courseChat.ragPanel')}</span>
                 <span className="course-chat-rag-count">{selectedFiles.length}</span>
                 <span className="course-chat-rag-toggle">
                   {isRagPanelExpanded ? '▲' : '▼'}
@@ -1115,22 +958,22 @@ const CourseChat: React.FC = () => {
               </div>
             )}
           </div>
-          {/* 🔥 修改：使用模型选择器组件替换原来的状态指示器 */}
-          <ModelSelector />
+          {/* 模型选择器 */}
+          {renderModelSelector()}
         </div>
 
         {/* 文件选择器 - 添加展开/收起动画 */}
         {showFileSelector && (
           <div className={`course-chat-file-selector ${isRagPanelExpanded ? 'course-chat-file-selector--expanded' : 'course-chat-file-selector--collapsed'}`}>
             <div className="course-chat-file-selector-header">
-              <h3>{t.selectCourseFiles}</h3>
+              <h3>{t('courseChat.selectCourseFiles')}</h3>
               <div className="course-chat-file-selector-actions">
                 {selectedFiles.length > 0 && (
                   <button 
                     className="course-chat-clear-selection"
                     onClick={clearSelectedFiles}
                   >
-                    {t.clearSelection}
+                    {t('courseChat.clearSelection')}
                   </button>
                 )}
                 <button 
@@ -1164,7 +1007,7 @@ const CourseChat: React.FC = () => {
                         {file.name}
                       </div>
                       <div className="course-chat-file-meta">
-                        {formatFileSize(file.size)} • {file.uploadDate.toLocaleDateString(userLanguage === 'zh_CN' ? 'zh-CN' : 'en-US')}
+                        {formatFileSize(file.size)} • {file.uploadDate.toLocaleDateString(i18n.language === 'zh_CN' ? 'zh-CN' : 'en-US')}
                         {file.folderName && (
                           <span style={{ marginLeft: '8px', color: '#6b7280' }}>
                             📁 {file.folderName}
@@ -1192,9 +1035,9 @@ const CourseChat: React.FC = () => {
                 ))
               ) : (
                 <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
-                  {t.noFiles}
+                  {t('courseChat.noFiles')}
                   <br />
-                  <small>请先在课程页面上传文件</small>
+                  <small>{t('courseChat.uploadFilesFirst')}</small>
                 </div>
               )}
             </div>
@@ -1208,7 +1051,7 @@ const CourseChat: React.FC = () => {
             <div className="course-chat-welcome-center">
               <div className="course-chat-welcome-logo">
                 <div className="course-chat-welcome-logo-image">🎓</div>
-                <span className="course-chat-welcome-logo-text">{t.courseAIAssistant}</span>
+                <span className="course-chat-welcome-logo-text">{t('courseChat.courseAIAssistant')}</span>
               </div>
               <div className="course-chat-welcome-greeting">
                 {greeting}
@@ -1217,7 +1060,7 @@ const CourseChat: React.FC = () => {
                 className="course-chat-rag-enable-btn"
                 onClick={toggleFileSelector}
               >
-                {t.enableRagSearch}
+                {t('courseChat.enableRagSearch')}
               </button>
             </div>
           )}
@@ -1240,21 +1083,21 @@ const CourseChat: React.FC = () => {
                     {message.role === 'user' ? (
                       <img
                         src="/Head_Portrait.png"
-                        alt={userLanguage === 'zh_CN' ? '用户' : 'User'}
+                        alt={t('courseChat.userAlt')}
                         className="course-chat-message-avatar-image"
                       />
                     ) : (
                       <img
                         src="/iCU_Icon.png"
-                        alt={userLanguage === 'zh_CN' ? 'AI助手' : 'AI Assistant'}
+                        alt={t('courseChat.aiAssistantAlt')}
                         className="course-chat-message-avatar-bot"
                       />
                     )}
                   </div>
                   <div className="course-chat-message-content">
-                    <div className="course-chat-message-text">{message.content}</div>
+                    <div className="course-chat-message-text"><MarkdownRenderer content={message.content} /></div>
                     <div className="course-chat-message-time">
-                      {new Date(message.created_at).toLocaleTimeString(userLanguage === 'zh_CN' ? 'zh-CN' : 'en-US', {
+                      {new Date(message.created_at).toLocaleTimeString(i18n.language === 'zh_CN' ? 'zh-CN' : 'en-US', {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}
@@ -1262,12 +1105,28 @@ const CourseChat: React.FC = () => {
                   </div>
                 </div>
               ))}
-              {isLoading && (
+              {/* SSE streaming response display */}
+              {isStreaming && streamingContent && (
                 <div className="course-chat-message course-chat-message--assistant">
                   <div className="course-chat-message-avatar">
                     <img
                       src="/iCU_Icon.png"
-                      alt={userLanguage === 'zh_CN' ? 'AI助手' : 'AI Assistant'}
+                      alt={t('courseChat.aiAssistantAlt')}
+                      className="course-chat-message-avatar-bot"
+                    />
+                  </div>
+                  <div className="course-chat-message-content">
+                    <div className="course-chat-message-text"><MarkdownRenderer content={streamingContent} /></div>
+                  </div>
+                </div>
+              )}
+              {/* Loading indicator (waiting for first chunk or non-stream loading) */}
+              {isLoading && !streamingContent && (
+                <div className="course-chat-message course-chat-message--assistant">
+                  <div className="course-chat-message-avatar">
+                    <img
+                      src="/iCU_Icon.png"
+                      alt={t('courseChat.aiAssistantAlt')}
                       className="course-chat-message-avatar-bot"
                     />
                   </div>
@@ -1296,7 +1155,7 @@ const CourseChat: React.FC = () => {
                   type="button"
                   className={`course-chat-file-toggle-btn ${selectedFiles.length > 0 ? 'course-chat-file-toggle-btn--active' : ''}`}
                   onClick={toggleFileSelector}
-                  title={selectedFiles.length > 0 ? t.manageRagFiles : t.selectFilesForRag}
+                  title={selectedFiles.length > 0 ? t('courseChat.manageRagFiles') : t('courseChat.selectFilesForRag')}
                 >
                   {selectedFiles.length > 0 ? '🔍' : '📁'}
                 </button>
@@ -1315,7 +1174,7 @@ const CourseChat: React.FC = () => {
                   type="button"
                   className="course-chat-new-chat-btn"
                   onClick={handleCreateNewChat}
-                  title={userLanguage === 'zh_CN' ? '新建聊天' : 'New Chat'}
+                  title={t('courseChat.newChat')}
                   disabled={isLoading}
                 >
                   <span className="course-chat-new-chat-icon">+</span>
@@ -1324,7 +1183,7 @@ const CourseChat: React.FC = () => {
                   className="course-chat-send-button"
                   onClick={(e) => handleSubmit(e)}
                   disabled={!inputValue.trim() || isLoading}
-                  title={t.sendMessage}
+                  title={t('courseChat.sendMessage')}
                 >
                   <span className="course-chat-send-icon">↗</span>
                 </button>
@@ -1333,12 +1192,10 @@ const CourseChat: React.FC = () => {
             <div className="course-chat-input-hint">
               {selectedFiles.length > 0 ? (
                 <span className="course-chat-rag-active">
-                  🔍 {t.ragEnabled} • {t.selectedFiles} {selectedFiles.length} {t.filesCount} • {t.clickRagBadge}
+                  🔍 {t('courseChat.ragEnabled')} • {t('courseChat.selectedFiles')} {selectedFiles.length} {t('courseChat.filesCount')} • {t('courseChat.clickRagBadge')}
                 </span>
               ) : (
-                userLanguage === 'zh_CN' 
-                  ? "点击📁按钮选择课程文件，启用RAG检索增强问答"
-                  : "Click 📁 button to select course files and enable RAG enhanced Q&A"
+                t('courseChat.selectFilesHint')
               )}
             </div>
           </div>

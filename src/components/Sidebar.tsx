@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { ChatSession, Semester } from '../types';
 import { chatAPI, semesterAPI } from '../utils/api';
 // 🔥 新增：导入AuthContext来获取用户信息
@@ -35,92 +37,6 @@ interface SemesterOption {
   isDefault: boolean;
   semester?: Semester;
 }
-
-// 国际化文本
-const i18nTexts = {
-  'zh_CN': {
-    // 按钮和链接
-    newChat: '新建对话',
-    courseManagement: '课程管理',
-    apiTest: 'API测试',
-    settings: '设置',
-    
-    // 历史聊天
-    chatHistory: '历史聊天',
-    noChatHistory: '暂无聊天记录',
-    loadMore: '滚动加载更多...',
-    
-    // 下拉菜单
-    selectSemester: '选择学期',
-    otherSemesters: '其他学期',
-    allSemesters: '所有学期',
-    
-    // 用户状态
-    online: '在线',
-    
-    // Tooltip
-    expandSidebar: '展开侧边栏',
-    collapseSidebar: '折叠侧边栏',
-    
-    // 学期格式
-    semesterFormat: {
-      't1': 'T1',
-      't2': 'T2',
-      'other': '其他学期'
-    },
-    
-    // 新增：聊天菜单
-    renameChat: '重命名',
-    deleteChat: '删除',
-    confirmDelete: '确定要删除这个对话吗？',
-    renamePlaceholder: '输入新的对话标题...',
-    
-    // 加载状态
-    loading: '加载中...',
-    loadError: '加载失败',
-  },
-  'en': {
-    // 按钮和链接
-    newChat: 'New Chat',
-    courseManagement: 'Course Management',
-    apiTest: 'API Test',
-    settings: 'Settings',
-    
-    // 历史聊天
-    chatHistory: 'Chat History',
-    noChatHistory: 'No chat history',
-    loadMore: 'Scroll to load more...',
-    
-    // 下拉菜单
-    selectSemester: 'Select Semester',
-    otherSemesters: 'Other Semesters',
-    allSemesters: 'All Semesters',
-    
-    // 用户状态
-    online: 'Online',
-    
-    // Tooltip
-    expandSidebar: 'Expand Sidebar',
-    collapseSidebar: 'Collapse Sidebar',
-    
-    // 学期格式
-    semesterFormat: {
-      't1': 'T1',
-      't2': 'T2',
-      'other': 'Other Semesters'
-    },
-    
-    // 新增：聊天菜单
-    renameChat: 'Rename',
-    deleteChat: 'Delete',
-    confirmDelete: 'Are you sure you want to delete this chat?',
-    renamePlaceholder: 'Enter new chat title...',
-    
-    // 加载状态
-    loading: 'Loading...',
-    loadError: 'Load failed',
-  }
-};
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
@@ -180,8 +96,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const chatMenuRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
-  // 获取当前语言的文本
-  const t = i18nTexts[language] || i18nTexts['zh_CN'];
+  // i18n
+  const { t } = useTranslation();
 
   // 🔥 修复：用户相关函数 - 移除不存在的 avatar_url 属性
   const getUserDisplayName = () => {
@@ -196,15 +112,15 @@ const Sidebar: React.FC<SidebarProps> = ({
       }
     }
     
-    return language === 'zh_CN' ? '用户' : 'User';
+    return t('sidebar.user');
   };
 
   const getUserStatusText = () => {
     if (user?.role === 'admin') {
-      return language === 'zh_CN' ? '管理员' : 'Admin';
+      return t('sidebar.admin');
     }
     
-    return t.online;
+    return t('sidebar.online');
   };
 
   // 🔥 修复：getUserAvatar 函数 - 移除对 avatar_url 的引用
@@ -243,9 +159,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       setSemesterLoadError(null);
       
       try {
-        console.log('=== 开始加载学期数据 ===');
         const response = await semesterAPI.getSemesters();
-        console.log('学期 API 响应:', response);
         
         if (response.semesters && Array.isArray(response.semesters)) {
           // 按创建时间倒序排列，最新的学期在前面
@@ -257,14 +171,13 @@ const Sidebar: React.FC<SidebarProps> = ({
           });
           
           setSemesters(sortedSemesters);
-          console.log('学期数据加载成功:', sortedSemesters);
         } else {
           console.warn('学期数据格式不正确:', response);
           setSemesters([]);
         }
       } catch (error) {
         console.error('加载学期数据失败:', error);
-        setSemesterLoadError(t.loadError);
+        setSemesterLoadError(t('sidebar.loadError'));
         // 设置默认学期数据作为降级方案
         setSemesters([]);
       } finally {
@@ -273,15 +186,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     };
 
     loadSemesters();
-  }, [t.loadError]);
+  }, []); // 学期数据与语言无关，只需加载一次
 
   // 生成学期选项 - 结合API数据和默认选项，修复类型定义
   const getSemesterOptions = (): SemesterOption[] => {
     const options: SemesterOption[] = [
       { 
         id: 'all', 
-        name: t.allSemesters, 
-        display: t.allSemesters,
+        name: t('sidebar.allSemesters'), 
+        display: t('sidebar.allSemesters'),
         isDefault: true
       }
     ];
@@ -301,20 +214,20 @@ const Sidebar: React.FC<SidebarProps> = ({
       const defaultSemesters: SemesterOption[] = [
         { 
           id: 'other', 
-          name: t.otherSemesters, 
-          display: t.otherSemesters,
+          name: t('sidebar.otherSemesters'), 
+          display: t('sidebar.otherSemesters'),
           isDefault: true
         },
         { 
           id: '2025-26-T2', 
-          name: `2025-26, ${t.semesterFormat.t2}`, 
-          display: `2025-26 ${t.semesterFormat.t2}`,
+          name: `2025-26, ${t('sidebar.semesterFormat.t2')}`, 
+          display: `2025-26 ${t('sidebar.semesterFormat.t2')}`,
           isDefault: true
         },
         { 
           id: '2025-26-T1', 
-          name: `2025-26, ${t.semesterFormat.t1}`, 
-          display: `2025-26 ${t.semesterFormat.t1}`,
+          name: `2025-26, ${t('sidebar.semesterFormat.t1')}`, 
+          display: `2025-26 ${t('sidebar.semesterFormat.t1')}`,
           isDefault: true
         }
       ];
@@ -326,11 +239,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // 导航菜单 - 根据语言动态生成
   const getNavigationItems = () => [
-    { icon: '📖', label: t.courseManagement, path: '/courses', hasSubmenu: true },
+    { icon: '📖', label: t('sidebar.courseManagement'), path: '/courses', hasSubmenu: true },
     // 🔥 修改：API测试页面也只对admin1用户显示
     ...(user?.username === 'admin1' ? [
-      { icon: '🧪', label: t.apiTest, path: '/api-test', hasSubmenu: false },
-      { icon: '⚙️', label: language === 'zh_CN' ? '管理员面板' : 'Admin Panel', path: '/admin', hasSubmenu: false }
+      { icon: '🧪', label: t('sidebar.apiTest'), path: '/api-test', hasSubmenu: false },
+      { icon: '⚙️', label: t('sidebar.adminPanel'), path: '/admin', hasSubmenu: false }
     ] : [])
   ];
 
@@ -411,8 +324,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // 修改学期点击处理函数
   const handleSemesterClick = (semesterId: string) => {
-    console.log('=== 学期点击事件 ===');
-    console.log('选择的学期ID:', semesterId);
     
     // 更新选中的学期
     onSemesterChange(semesterId);
@@ -422,7 +333,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     setDropdownPosition(null);
     
     // 跳转到课程页面
-    console.log('跳转到课程页面...');
     navigate('/courses');
   };
 
@@ -442,7 +352,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
     
     // 默认显示
-    return selectedSemester === 'all' ? t.allSemesters : '未知学期';
+    return selectedSemester === 'all' ? t('sidebar.allSemesters') : t('sidebar.unknownSemester');
   };
 
   const handleCollapseToggle = () => {
@@ -506,7 +416,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <div className="sidebar__tooltip-content">
-          {t.expandSidebar}
+          {t('sidebar.expandSidebar')}
         </div>
         <div className="sidebar__tooltip-arrow"></div>
       </div>,
@@ -538,7 +448,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <div className="sidebar__submenu-header">
-          <span className="sidebar__submenu-title">{t.selectSemester}</span>
+          <span className="sidebar__submenu-title">{t('sidebar.selectSemester')}</span>
           <span className="sidebar__submenu-current">{getCurrentSemesterDisplay()}</span>
         </div>
 
@@ -549,7 +459,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             textAlign: 'center', 
             color: '#6b7280' 
           }}>
-            {t.loading}
+            {t('sidebar.loading')}
           </div>
         )}
         
@@ -602,7 +512,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 color: '#6b7280',
                 textAlign: 'center'
               }}>
-                {language === 'zh_CN' ? `共 ${semesters.length} 个学期` : `${semesters.length} semesters`}
+                {t('sidebar.semesterCount', { count: semesters.length })}
               </div>
             )}
           </>
@@ -632,14 +542,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => handleRenameChat(showChatMenu)}
         >
           <span className="sidebar__chat-menu-item-icon">✏️</span>
-          {t.renameChat}
+          {t('sidebar.renameChat')}
         </button>
         <button
           className="sidebar__chat-menu-item sidebar__chat-menu-item--danger"
           onClick={() => handleDeleteChat(showChatMenu)}
         >
           <span className="sidebar__chat-menu-item-icon">🗑️</span>
-          {t.deleteChat}
+          {t('sidebar.deleteChat')}
         </button>
       </div>,
       document.body
@@ -650,27 +560,16 @@ const Sidebar: React.FC<SidebarProps> = ({
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const locale = i18n.language === 'zh_CN' ? 'zh-CN' : 'en-US';
     
-    if (language === 'zh_CN') {
-      if (days === 0) {
-        return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-      } else if (days === 1) {
-        return '昨天';
-      } else if (days < 7) {
-        return `${days}天前`;
-      } else {
-        return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
-      }
+    if (days === 0) {
+      return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+    } else if (days === 1) {
+      return t('sidebar.yesterday');
+    } else if (days < 7) {
+      return t('sidebar.daysAgo', { days });
     } else {
-      if (days === 0) {
-        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      } else if (days === 1) {
-        return 'Yesterday';
-      } else if (days < 7) {
-        return `${days} days ago`;
-      } else {
-        return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
-      }
+      return date.toLocaleDateString(locale, { month: '2-digit', day: '2-digit' });
     }
   };
 
@@ -711,15 +610,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   const loadChatSessions = async () => {
     try {
       setIsLoadingChatList(true);
-      console.log('=== 开始加载聊天列表 ===');
       
       // 添加最小加载时间，让用户看到加载效果
       const [response] = await Promise.all([
         chatAPI.getChats(),
-        new Promise(resolve => setTimeout(resolve, 500)) // 最少显示 500ms 加载状态
       ]);
       
-      console.log('API 响应:', response);
       
       if (response.chats && Array.isArray(response.chats)) {
         const formattedSessions = response.chats.map(chat => ({
@@ -732,7 +628,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           courseId: chat.course_id || undefined,
         }));
         
-        console.log('格式化后的聊天会话:', formattedSessions);
         if (onChatListLoaded) {
           onChatListLoaded(formattedSessions);
         }
@@ -750,22 +645,17 @@ const Sidebar: React.FC<SidebarProps> = ({
       setIsCreatingNewChat(true);
       setNewChatSuccess(false);
       
-      console.log('=== 准备新建聊天 ===');
       
       // 🔥 不直接创建聊天，只是导航并清空状态
       if (location.pathname !== '/chat') {
-        console.log('导航到聊天页面...');
         navigate('/chat');
         // 给导航一点时间
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
       
       // 清空当前选中的会话，准备创建新聊天
       onNewChat(); // 这会清空 currentSessionId
       onSessionSelect(''); // 确保没有选中任何会话
-      
-      // 模拟一个短暂的加载过程，让用户感觉有响应
-      await new Promise(resolve => setTimeout(resolve, 300));
       
       setNewChatSuccess(true);
       
@@ -773,8 +663,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         setNewChatSuccess(false);
       }, 800);
       
-      console.log('=== 新建聊天准备完成 ===');
-      console.log('用户现在可以输入第一条消息来创建聊天');
       
     } catch (error) {
       console.error('准备新聊天失败:', error);
@@ -791,40 +679,29 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // 重命名提交处理
   const handleRenameSubmit = async () => {
-    console.log('=== 开始保存重命名 ===');
-    console.log('renamingChatId:', renamingChatId);
-    console.log('renameValue:', `"${renameValue}"`);
     
     if (renamingChatId && renameValue.trim()) {
       try {
         setIsRenamingChat(renamingChatId);
-        console.log('准备调用重命名 API...');
         
         const chatId = parseInt(renamingChatId);
-        console.log('转换后的 chatId:', chatId);
         
         if (isNaN(chatId)) {
           console.error('无效的聊天 ID:', renamingChatId);
           return;
         }
         
-        // 添加最小加载时间
         const [updatedChat] = await Promise.all([
           chatAPI.updateChat(chatId, { title: renameValue.trim() }),
-          new Promise(resolve => setTimeout(resolve, 300))
         ]);
         
-        console.log('API 重命名成功:', updatedChat);
         
         if (onChatRenamed) {
-          console.log('调用父组件回调...');
           onChatRenamed(renamingChatId, renameValue.trim());
         }
         
-        console.log('清除重命名状态...');
         setRenamingChatId(null);
         setRenameValue('');
-        console.log('=== 重命名保存完成 ===');
         
       } catch (error) {
         console.error('重命名聊天失败:', error);
@@ -836,7 +713,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         setIsRenamingChat(null);
       }
     } else {
-      console.log('取消保存 - 条件不满足');
       setRenamingChatId(null);
       setRenameValue('');
     }
@@ -844,32 +720,24 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // 删除聊天处理
   const handleDeleteChat = async (sessionId: string) => {
-    console.log('=== 开始删除聊天 ===');
-    console.log('sessionId:', sessionId);
     
-    if (window.confirm(t.confirmDelete)) {
+    if (window.confirm(t('sidebar.confirmDelete'))) {
       try {
         setIsDeletingChat(sessionId);
-        console.log('准备调用删除 API...');
         
         const chatId = parseInt(sessionId);
-        console.log('转换后的 chatId:', chatId);
         
         if (isNaN(chatId)) {
           console.error('无效的聊天 ID:', sessionId);
           return;
         }
         
-        // 添加最小加载时间
         await Promise.all([
           chatAPI.deleteChat(chatId),
-          new Promise(resolve => setTimeout(resolve, 300))
         ]);
         
-        console.log('API 删除成功');
         
         if (onChatDeleted) {
-          console.log('调用父组件删除回调...');
           onChatDeleted(sessionId);
         }
         
@@ -877,11 +745,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         setChatMenuPosition(null);
         
         if (currentSessionId === sessionId) {
-          console.log('删除的是当前聊天，清除选中状态...');
           onSessionSelect('');
         }
         
-        console.log('=== 删除聊天完成 ===');
         
       } catch (error) {
         console.error('删除聊天失败:', error);
@@ -893,30 +759,23 @@ const Sidebar: React.FC<SidebarProps> = ({
         setIsDeletingChat(null);
       }
     } else {
-      console.log('用户取消删除');
       setShowChatMenu(null);
       setChatMenuPosition(null);
     }
   };
 
   const handleRenameCancel = () => {
-    console.log('=== 取消重命名 ===');
     setRenamingChatId(null);
     setRenameValue('');
   };
 
   const handleRenameKeyDown = (event: React.KeyboardEvent) => {
-    console.log('=== 键盘事件 ===');
-    console.log('按键:', event.key);
-    console.log('当前值:', `"${renameValue}"`);
     
     if (event.key === 'Enter') {
-      console.log('检测到回车键，准备保存...');
       event.preventDefault();
       event.stopPropagation();
       handleRenameSubmit();
     } else if (event.key === 'Escape') {
-      console.log('检测到ESC键，准备取消...');
       event.preventDefault();
       event.stopPropagation();
       handleRenameCancel();
@@ -924,16 +783,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const handleRenameBlur = (event: React.FocusEvent) => {
-    console.log('=== 输入框失焦 ===');
     
     const relatedTarget = event.relatedTarget as HTMLElement;
     if (relatedTarget && relatedTarget.closest('.sidebar__chat-menu-btn')) {
-      console.log('焦点转移到了菜单按钮，不保存');
       return;
     }
     
     setTimeout(() => {
-      console.log('延迟保存...');
       handleRenameSubmit();
     }, 150);
   };
@@ -945,8 +801,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
 
     try {
-      console.log('=== 点击聊天项目 ===');
-      console.log('聊天ID:', sessionId);
       
       // 🔥 设置加载状态
       setLoadingChatId(sessionId);
@@ -957,20 +811,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       
       // 🔥 如果不在聊天页面，先跳转到聊天页面
       if (location.pathname !== '/chat') {
-        console.log('跳转到聊天页面...');
         navigate('/chat');
-        // 给路由跳转更多时间
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Give router navigation a moment
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
       
-      // 🔥 增加聊天加载时间 - 从 800ms 增加到 2000ms
-      // 这个时间可以根据实际情况调整：
-      // - 1500ms: 适中的加载时间
-      // - 2000ms: 给聊天记录充足的加载时间
-      // - 2500ms: 对于较慢的网络环境
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 增加聊天加载时间
+      // Chat loading is now event-driven, no artificial delay needed
       
-      console.log('聊天加载完成');
       
     } catch (error) {
       console.error('聊天加载失败:', error);
@@ -1004,7 +852,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           onMouseLeave={handleTooltipHide}
           onFocus={handleTooltipShow}
           onBlur={handleTooltipHide}
-          aria-label={isCollapsed ? t.expandSidebar : t.collapseSidebar}
+          aria-label={isCollapsed ? t('sidebar.expandSidebar') : t('sidebar.collapseSidebar')}
           style={{ display: 'none' }} // 🔥 隐藏折叠按钮
         >
           <div className="sidebar__collapse-icon">
@@ -1058,10 +906,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               </span>
               <span className="sidebar__nav-text">
                 {isCreatingNewChat 
-                  ? (language === 'zh_CN' ? '创建中...' : 'Creating...')
+                  ? t('sidebar.creating')
                   : newChatSuccess 
-                  ? (language === 'zh_CN' ? '创建成功！' : 'Created!')
-                  : t.newChat
+                  ? t('sidebar.created')
+                  : t('sidebar.newChat')
                 }
               </span>
             </button>
@@ -1094,7 +942,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* 🔄 修改：历史聊天 - 添加加载状态显示 */}
           <div className="sidebar__section sidebar__section--flex">
             <div className="sidebar__section-title">
-              {t.chatHistory}
+              {t('sidebar.chatHistory')}
               {isLoadingChatList && (
                 <div className="sidebar__loading-spinner sidebar__loading-spinner--small" style={{ marginLeft: '8px' }}></div>
               )}
@@ -1106,10 +954,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div className="sidebar__chat-list-loading-content">
                   <div className="sidebar__loading-spinner sidebar__loading-spinner--large"></div>
                   <div className="sidebar__chat-list-loading-text">
-                    {language === 'zh_CN' ? '加载聊天记录中...' : 'Loading chat history...'}
+                    {t('sidebar.loadingChatHistory')}
                   </div>
                   <div className="sidebar__chat-list-loading-subtitle">
-                    {language === 'zh_CN' ? '请稍候，正在获取您的聊天历史' : 'Please wait, fetching your chat history'}
+                    {t('sidebar.loadingChatHistoryDesc')}
                   </div>
                 </div>
                 
@@ -1130,7 +978,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar__chat-list">
                 {chatSessions.length === 0 ? (
                   <div className="sidebar__empty-state">
-                    {t.noChatHistory}
+                    {t('sidebar.noChatHistory')}
                   </div>
                 ) : (
                   <>
@@ -1162,9 +1010,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </span>
                         <span className="sidebar__chat-text">
                           {isDeletingChat === session.id 
-                            ? (language === 'zh_CN' ? '删除中...' : 'Deleting...')
+                            ? t('sidebar.deleting')
                             : loadingChatId === session.id
-                            ? (language === 'zh_CN' ? '加载中...' : 'Loading...')
+                            ? t('sidebar.loading')
                             : truncateText(session.title)
                         }
                         </span>
@@ -1177,14 +1025,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                             className="sidebar__chat-rename-input"
                             value={renameValue}
                             onChange={(e) => {
-                              console.log('输入值变化:', `"${e.target.value}"`);
                               setRenameValue(e.target.value);
                             }}
                             onBlur={handleRenameBlur}
                             onKeyDown={handleRenameKeyDown}
-                            placeholder={t.renamePlaceholder}
+                            placeholder={t('sidebar.renamePlaceholder')}
                             onClick={(e) => {
-                              console.log('输入框被点击');
                               e.stopPropagation();
                             }}
                             disabled={isRenamingChat === session.id}
@@ -1213,7 +1059,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     {/* 如果有更多聊天记录，显示加载更多按钮 */}
                     {chatSessions.length > 10 && (
                       <div className="sidebar__load-more">
-                        <div className="sidebar__load-more-text">{t.loadMore}</div>
+                        <div className="sidebar__load-more-text">{t('sidebar.loadMore')}</div>
                       </div>
                     )}
                   </>
@@ -1228,7 +1074,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar__user-avatar">
                 <img
                   src={getUserAvatar()}
-                  alt={language === 'zh_CN' ? '用户头像' : 'User Avatar'}
+                  alt={t('sidebar.userAvatar')}
                   className="sidebar__user-image"
                   onError={(e) => {
                     // 🔥 头像加载失败时使用默认头像

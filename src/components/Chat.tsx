@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { ChatSession, ChatMessage, AIModel } from '../types';
-import { chatAPI } from '../utils/api';
+import { chatAPI, fileAPI } from '../utils/api';
 import ModelSelector from './ModelSelector';
+import MarkdownRenderer from './MarkdownRenderer';
 import './Chat.css';
 import { createPortal } from 'react-dom';
 
@@ -27,112 +30,6 @@ interface ChatProps {
   onError?: (error: string) => void;
   onFilesUploaded?: (fileTokens: string[]) => void;
 }
-
-// 国际化文本
-const i18nTexts = {
-  'zh_CN': {
-    // 主要问候语
-    mainGreeting: 'I See U！我是Intelligent CU，您的AI学习助手',
-    
-    // 随机问候语
-    randomGreetings: [
-      '准备好开始学习之旅了吗？',
-      '有什么我可以帮助您的吗？',
-      '让我们一起探索知识的海洋',
-      '今天想学习什么新内容呢？',
-      '我在这里随时为您提供帮助'
-    ],
-    
-    // 🔥 新增：9个预定义的消息建议（来自workflowExamples）
-    messageSuggestions: [
-      '本周香港天气怎么样？',
-      'CSCI3100这门课难不难？',
-      'NA体育馆在哪里？开放时间是什么？',
-      '深度学习领域最近有什么重大突破？',
-      '比较一下CSCI3100和CSCI3160，应该选哪个？',
-      '如何规划计算机专业的选课路径？',
-      '用Python写一个快速排序算法',
-      '我的C++作业编译报错，帮我看看哪里错了',
-      'CUHK的CSCI课程主要用什么编程语言？'
-    ],
-    
-    // 界面文本
-    inputPlaceholder: 'How can I help you?',
-    uploadFile: '上传文件',
-    removeFile: '删除文件',
-    addFile: '添加文件',
-    cancel: '取消',
-    addToChat: '添加到聊天框',
-    dropFileHint: '释放文件以上传',
-    sources: '来源',
-    
-    // 文件类型
-    fileSize: '大小',
-    fileName: '文件名',
-
-    // 🔥 新增文本
-    deepSearch: '深度搜索',
-    deepSearchTooltip: '启用知识库深度搜索功能',
-    modelSwitchConfirm: '切换模型需要创建新对话，是否继续？',
-    searchToggleConfirm: '修改搜索设置需要创建新对话，是否继续？',
-    createNewChatWithModel: '是否创建新对话并使用该模型？',
-    createNewChatWithSearch: '是否创建新对话并开启深度搜索功能？',
-    createNewChatWithoutSearch: '是否创建新对话并取消深度搜索功能？',
-    confirm: '确认',
-    cancelAction: '取消' // 🔥 修改为 cancelAction 避免重复
-  },
-  'en': {
-    // 主要问候语
-    mainGreeting: 'I See U! I\'m Intelligent CU, your AI learning assistant',
-    
-    // 随机问候语
-    randomGreetings: [
-      'Ready to start your learning journey?',
-      'How can I help you today?',
-      'Let\'s explore the ocean of knowledge together',
-      'What would you like to learn today?',
-      'I\'m here to help you anytime'
-    ],
-    
-    // 🔥 新增：9个预定义的消息建议（来自workflowExamples）
-    messageSuggestions: [
-      'What\'s the weather like in Hong Kong this week?',
-      'Is CSCI3100 difficult?',
-      'Where is the NA Sports Complex? What are the opening hours?',
-      'What are the recent major breakthroughs in deep learning?',
-      'Compare CSCI3100 and CSCI3160, which should I choose?',
-      'How to plan the course path for Computer Science major?',
-      'Write a quicksort algorithm in Python',
-      'My C++ assignment has compile errors, help me find the bugs',
-      'What programming languages are mainly used in CUHK CSCI courses?'
-    ],
-    
-    // 界面文本
-    inputPlaceholder: 'How can I help you?',
-    uploadFile: 'Upload File',
-    removeFile: 'Remove File',
-    addFile: 'Add File',
-    cancel: 'Cancel',
-    addToChat: 'Add to Chat',
-    dropFileHint: 'Drop files to upload',
-    sources: 'Sources',
-    
-    // 文件类型
-    fileSize: 'Size',
-    fileName: 'File Name',
-
-    // 🔥 新增文本
-    deepSearch: 'Deep Search',
-    deepSearchTooltip: 'Enable knowledge base deep search',
-    modelSwitchConfirm: 'Switching models requires creating a new chat. Continue?',
-    searchToggleConfirm: 'Changing search settings requires creating a new chat. Continue?',
-    createNewChatWithModel: 'Create new chat and use this model?',
-    createNewChatWithSearch: 'Create new chat and enable deep search?',
-    createNewChatWithoutSearch: 'Create new chat and disable deep search?',
-    confirm: 'Confirm',
-    cancelAction: 'Cancel' // 🔥 修改为 cancelAction 避免重复
-  }
-};
 
 // 🔥 新增：文件名截断函数 - 在组件开始处添加
 const truncateFileName = (fileName: string, maxLength: number = 20): string => {
@@ -182,6 +79,11 @@ const Chat: React.FC<ChatProps> = ({
   const [pendingModel, setPendingModel] = useState<AIModel | null>(null);
   const [pendingSearch, setPendingSearch] = useState<boolean | null>(null);
   
+  // SSE streaming state
+  const [streamingContent, setStreamingContent] = useState<string>('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
+  
   // 🔥 获取当前对话的初始模型和搜索设置
   const [initialModel, setInitialModel] = useState<AIModel>(AIModel.STAR);
   const [initialSearchEnabled, setInitialSearchEnabled] = useState(false);
@@ -206,29 +108,25 @@ const Chat: React.FC<ChatProps> = ({
   // 合并外部和内部的loading状态
   const isLoading = externalLoading || internalLoading;
 
-  // 获取当前语言的文本
-  const t = i18nTexts[language] || i18nTexts['zh_CN'];
+  // i18n
+  const { t } = useTranslation();
 
   const getRandomGreeting = () => {
-    const randomIndex = Math.floor(Math.random() * t.randomGreetings.length);
-    return t.randomGreetings[randomIndex];
+    const greetings = t('chat.randomGreetings', { returnObjects: true }) as string[];
+    const randomIndex = Math.floor(Math.random() * greetings.length);
+    return greetings[randomIndex];
   };
 
   const [randomGreeting] = useState(() => getRandomGreeting());
 
   // 🔥 新增：生成3个随机消息建议
   const getRandomSuggestions = () => {
-    const suggestions = t.messageSuggestions;
+    const suggestions = t('chat.messageSuggestions', { returnObjects: true }) as string[];
     const shuffled = [...suggestions].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 3);
   };
 
   const [randomSuggestions] = useState(() => getRandomSuggestions());
-
-  // 获取认证token
-  const getAuthToken = (): string | null => {
-    return localStorage.getItem('auth_token');
-  };
 
   // 文件图标函数
   const getFileIcon = (fileName: string): string => {
@@ -291,9 +189,8 @@ const Chat: React.FC<ChatProps> = ({
   const deduplicateMessages = useCallback((messages: ChatMessage[]): ChatMessage[] => {
     const seen = new Set<number>();
     return messages.filter(message => {
-      const id = typeof message.id === 'string' ? parseInt(message.id) : message.id;
+      const id = typeof message.id === 'string' ? Number(message.id) : message.id;
       if (seen.has(id)) {
-        console.log('发现重复消息，已去除:', id);
         return false;
       }
       seen.add(id);
@@ -303,7 +200,6 @@ const Chat: React.FC<ChatProps> = ({
 
   // 🔥 修复：批量设置消息的函数
   const setBatchMessages = useCallback((sessionId: string, messages: ChatMessage[]) => {
-    console.log('批量设置消息:', sessionId, messages.length);
     
     // 去重和排序
     const uniqueMessages = deduplicateMessages(messages);
@@ -311,14 +207,12 @@ const Chat: React.FC<ChatProps> = ({
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
     
-    console.log('去重排序后消息数量:', sortedMessages.length);
     
     // 🔥 关键：使用特殊的批量设置回调，而不是逐条调用onMessageSent
     if (onBatchMessagesLoaded) {
       onBatchMessagesLoaded(sessionId, sortedMessages);
     } else {
       // 降级方案：如果没有批量回调，清空后逐条添加（但只调用一次每条消息）
-      console.log('使用降级方案：逐条设置消息');
       sortedMessages.forEach((message, index) => {
         setTimeout(() => {
           onMessageSent?.(message);
@@ -333,12 +227,10 @@ const Chat: React.FC<ChatProps> = ({
     
     // 🔥 防止重复加载同一个会话
     if (loadingRef.current) {
-      console.log('正在加载中，跳过重复请求');
       return;
     }
     
     if (lastLoadedSessionRef.current === sessionIdStr) {
-      console.log('已加载过此会话，跳过重复加载:', sessionIdStr);
       return;
     }
     
@@ -347,13 +239,10 @@ const Chat: React.FC<ChatProps> = ({
       setInternalLoading(true);
       setLoadingMessage('正在加载聊天记录...');
       
-      console.log(`开始加载聊天 ${chatId} 的消息`);
       const response = await chatAPI.getChatMessages(chatId);
       
-      console.log('获取到的聊天消息:', response);
       
       if (response.messages && response.messages.length > 0) {
-        console.log(`从API获取了 ${response.messages.length} 条消息`);
         
         // 🔥 使用批量设置而不是逐条调用
         setBatchMessages(sessionIdStr, response.messages);
@@ -364,7 +253,6 @@ const Chat: React.FC<ChatProps> = ({
         // 滚动到底部
         setTimeout(scrollToBottom, 100);
       } else {
-        console.log('会话无历史消息');
       }
     } catch (error) {
       console.error('加载聊天消息失败:', error);
@@ -387,10 +275,8 @@ const Chat: React.FC<ChatProps> = ({
                           lastLoadedSessionRef.current !== sessionIdStr;
       
       if (needsLoading) {
-        console.log('需要加载聊天消息:', sessionIdStr);
         loadChatMessages(Number(currentSession.id));
       } else {
-        console.log(`会话 ${sessionIdStr} 已有 ${currentSession.messages?.length || 0} 条消息，无需重新加载`);
         // 确保滚动到底部
         setTimeout(scrollToBottom, 100);
       }
@@ -408,10 +294,6 @@ const Chat: React.FC<ChatProps> = ({
       const sessionModel = (currentSession as any).ai_model || AIModel.STAR;
       const sessionSearch = (currentSession as any).search_enabled || false;
       
-      console.log('🔍 从聊天会话读取设置:');
-      console.log('- 会话ID:', currentSession.id);
-      console.log('- 模型设置:', sessionModel);
-      console.log('- 搜索设置:', sessionSearch);
       
       setInitialModel(sessionModel);
       setInitialSearchEnabled(sessionSearch);
@@ -464,7 +346,7 @@ const Chat: React.FC<ChatProps> = ({
 
   // 🔥 新增：处理随机按钮点击
   const handleRandomClick = () => {
-    const suggestions = t.messageSuggestions;
+    const suggestions = t('chat.messageSuggestions', { returnObjects: true }) as string[];
     const randomIndex = Math.floor(Math.random() * suggestions.length);
     const randomSuggestion = suggestions[randomIndex];
     setInputValue(randomSuggestion);
@@ -554,7 +436,6 @@ const Chat: React.FC<ChatProps> = ({
   // 🔥 关键修改：文件上传处理 - 保存token而不只是ID
   const handleFileUpload = async (file: File): Promise<{ id: string; token: string } | null> => {
     try {
-      console.log('开始上传临时文件:', file.name);
       
       const fileId = Date.now().toString();
       setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
@@ -569,7 +450,6 @@ const Chat: React.FC<ChatProps> = ({
         }
       );
       
-      console.log('临时文件上传成功:', response);
       
       // 清除进度显示
       setTimeout(() => {
@@ -631,7 +511,6 @@ const Chat: React.FC<ChatProps> = ({
     try {
       // 从本地列表移除
       setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
-      console.log('文件已从列表中移除:', fileId);
     } catch (error) {
       console.error('删除文件失败:', error);
     }
@@ -652,16 +531,10 @@ const Chat: React.FC<ChatProps> = ({
           .map(uf => uf.token)
           .filter(token => token && typeof token === 'string' && token.trim() !== '') as string[];
         
-        console.log('=== 发送消息到现有聊天调试信息 ===');
-        console.log('消息内容:', trimmedInput);
-        console.log('选中的AI模型:', selectedModel);
-        console.log('深度搜索状态:', searchEnabled); // 🔥 添加搜索状态日志
-        console.log('临时文件token列表:', fileTokens);
-        
         const sendMessageData = {
           content: trimmedInput,
           ai_model: selectedModel,
-          search_enabled: searchEnabled, // 🔥 添加搜索设置到请求中
+          search_enabled: searchEnabled,
           ...(fileTokens.length > 0 && {
             temporary_file_tokens: fileTokens
           })
@@ -669,12 +542,12 @@ const Chat: React.FC<ChatProps> = ({
 
         const chatId = Number(currentSession.id);
         
-        // 🔥 修复：生成唯一的消息ID，避免重复
-        const messageId = Date.now() + Math.random();
+        // Generate unique temp message ID (negative to avoid collision with server IDs)
+        const tempMessageId = -(Date.now() * 1000 + Math.floor(Math.random() * 1000));
         const currentTime = new Date().toISOString();
         
         const userMessage: ChatMessage = {
-          id: messageId,
+          id: tempMessageId,
           chat_id: chatId,
           content: trimmedInput,
           role: 'user',
@@ -692,11 +565,10 @@ const Chat: React.FC<ChatProps> = ({
           })) : null,
         };
         
-        // 🔥 先添加用户消息
-        console.log('立即添加用户消息到UI:', userMessage);
+        // Add user message to UI immediately
         onMessageSent?.(userMessage);
         
-        // 清空输入
+        // Clear input
         setInputValue('');
         setUploadedFiles([]);
         if (textareaRef.current) {
@@ -705,22 +577,53 @@ const Chat: React.FC<ChatProps> = ({
         
         setLoadingMessage('AI正在思考中...');
         
-        // 发送到API
-        const response = await chatAPI.sendMessage(chatId, sendMessageData);
+        // Use SSE streaming
+        setIsStreaming(true);
+        setStreamingContent('');
+        let finalAiMessage: ChatMessage | null = null;
         
-        // 🔥 处理AI响应
-        if (response.ai_message) {
-          // 确保AI消息有唯一ID
-          if (!response.ai_message.id) {
-            response.ai_message.id = Date.now() + Math.random() + 1;
+        await chatAPI.sendMessageStream(
+          chatId,
+          sendMessageData,
+          (event: any) => {
+            switch (event.type) {
+              case 'user_message':
+                // Server confirmed user message - replace temp with real ID
+                if (event.user_message) {
+                  onMessageSent?.(event.user_message);
+                }
+                break;
+              case 'content':
+                // Append streaming content chunk
+                setStreamingContent(prev => prev + (event.content || ''));
+                break;
+              case 'completion':
+                // Stream complete - save final AI message
+                if (event.ai_message) {
+                  finalAiMessage = event.ai_message;
+                }
+                break;
+              case 'error':
+                onError?.(event.error || '流式响应出错');
+                break;
+            }
+          },
+          (error: Error) => {
+            onError?.(error.message || '流式请求失败');
           }
-          
-          console.log('添加AI响应消息:', response.ai_message);
-          onMessageSent?.(response.ai_message);
+        );
+        
+        // Stream finished - add final AI message and clear streaming state
+        setIsStreaming(false);
+        setStreamingContent('');
+        
+        if (finalAiMessage) {
+          onMessageSent?.(finalAiMessage);
         }
 
       } catch (error) {
-        console.error('发送消息失败:', error);
+        setIsStreaming(false);
+        setStreamingContent('');
         onError?.(error instanceof Error ? error.message : '发送消息失败');
       } finally {
         setInternalLoading(false);
@@ -736,19 +639,12 @@ const Chat: React.FC<ChatProps> = ({
           .map(uf => uf.token)
           .filter(token => token && typeof token === 'string' && token.trim() !== '') as string[];
         
-        console.log('=== 创建新聊天调试信息 ===');
-        console.log('消息内容:', trimmedInput);
-        console.log('选中的AI模型:', selectedModel);
-        console.log('深度搜索状态:', searchEnabled); // 🔥 添加搜索状态日志
-        console.log('临时文件token列表:', fileTokens);
         
         if (fileTokens.length > 0 && onFilesUploaded) {
-          console.log('通知父组件文件tokens:', fileTokens);
           onFilesUploaded(fileTokens);
           await new Promise(resolve => setTimeout(resolve, 50));
         }
         
-        console.log('调用onSendMessage，传递消息、AI模型和搜索设置');
         await onSendMessage(trimmedInput, undefined, selectedModel, searchEnabled); // 🔥 传递搜索设置
         
         // 清空输入
@@ -868,124 +764,8 @@ const Chat: React.FC<ChatProps> = ({
     }
   }, [currentSession?.messages, handleScroll]);
 
-  // 新增：uploadTemporaryFile函数定义
-  const uploadTemporaryFile = async (
-    file: File,
-    purpose: string = 'chat_upload',
-    expiry_hours: number = 1,
-    onProgress?: (progress: number) => void // 修复：添加类型定义
-  ): Promise<{ file: { id: number; token: string; original_name: string; file_type: string; file_size: number; mime_type: string; expires_at: string; purpose: string; created_at: string } }> => {
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://api-icu.584743.xyz/api/v1';
-    const USE_MOCK_API = process.env.REACT_APP_USE_MOCK_API === 'true';
-    
-    if (USE_MOCK_API) {
-      // 模拟返回
-      return new Promise((resolve) => {
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 20;
-          onProgress?.(progress);
-          if (progress >= 100) {
-            clearInterval(interval);
-            resolve({
-              file: {
-                id: Date.now(),
-                token: 'mock-token-' + Date.now(),
-                original_name: file.name,
-                file_type: file.type.split('/').pop() || '',
-                file_size: file.size,
-                mime_type: file.type,
-                expires_at: new Date(Date.now() + expiry_hours * 3600 * 1000).toISOString(),
-                purpose,
-                created_at: new Date().toISOString()
-              }
-            });
-          }
-        }, 200);
-      });
-    }
-
-    const token = getAuthToken();
-    const url = `${API_BASE_URL}/files/temporary`;
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('purpose', purpose);
-    formData.append('expiry_hours', expiry_hours.toString());
-
-    console.log(`开始上传临时文件: ${file.name}, 大小: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.timeout = 60000; // 60秒超时
-
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable && onProgress) {
-          const progress = Math.round((e.loaded / e.total) * 100);
-          console.log(`上传进度: ${progress}%`);
-          onProgress(progress);
-        }
-      });
-
-      xhr.addEventListener('load', () => {
-        console.log(`上传完成，状态码: ${xhr.status}`);
-        
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const rawResponse = xhr.responseText;
-            console.log('=== 临时文件上传原始响应 ===');
-            console.log('原始响应:', rawResponse);
-            
-            const response = JSON.parse(rawResponse);
-            console.log('解析后的完整响应:', JSON.stringify(response, null, 2));
-            
-            // 修复：正确提取响应数据
-            const fileData = response?.data?.file || response?.file || response;
-            console.log('提取的文件数据:', JSON.stringify(fileData, null, 2));
-            
-            // 验证token字段
-            if (!fileData.token) {
-              console.error('警告：响应中没有token字段！');
-            }
-            
-            resolve({
-              file: {
-                id: fileData.id,
-                token: fileData.token,
-                original_name: fileData.original_name,
-                file_type: fileData.file_type,
-                file_size: fileData.file_size,
-                mime_type: fileData.mime_type,
-                expires_at: fileData.expires_at,
-                purpose: fileData.purpose,
-                created_at: fileData.created_at
-              }
-            });
-          } catch (parseError) {
-            console.error('解析响应失败:', parseError);
-            reject(new Error('解析响应失败'));
-          }
-        } else {
-          reject(new Error(`上传失败，状态码: ${xhr.status}`));
-        }
-      });
-
-      xhr.addEventListener('error', () => {
-        console.error('上传请求失败');
-        reject(new Error('上传请求失败'));
-      });
-
-      xhr.addEventListener('timeout', () => {
-        console.error('上传请求超时');
-        reject(new Error('上传请求超时'));
-      });
-
-      xhr.open('POST', url, true);
-      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-      xhr.setRequestHeader('Accept', 'application/json');
-      xhr.send(formData);
-    });
-  };
+  // Delegate to centralized API client
+  const uploadTemporaryFile = fileAPI.uploadTemporaryFile;
 
   // 🔥 检查是否有消息的函数 - 重命名避免冲突
   const checkHasMessages = () => {
@@ -1078,7 +858,7 @@ const Chat: React.FC<ChatProps> = ({
               </div>
               <div className="chat-welcome__greeting">
                 <div className="chat-welcome__main-greeting">
-                  {t.mainGreeting}
+                  {t('chat.mainGreeting')}
                 </div>
                 <div className="chat-welcome__random-greeting">
                   {randomGreeting}
@@ -1130,11 +910,11 @@ const Chat: React.FC<ChatProps> = ({
                     )}
                   </div>
                   <div className="chat-message-content">
-                    <div className="chat-message-text">{message.content}</div>
+                    <div className="chat-message-text"><MarkdownRenderer content={message.content} /></div>
                     {/* 显示RAG来源 */}
                     {message.rag_sources && message.rag_sources.length > 0 && (
                       <div className="chat-message-sources">
-                        <small>{t.sources}: {message.rag_sources.map(source => source.source_file).join(', ')}</small>
+                        <small>{t('chat.sources')}: {message.rag_sources.map(source => source.source_file).join(', ')}</small>
                       </div>
                     )}
                     {/* 显示文件附件 */}
@@ -1156,7 +936,7 @@ const Chat: React.FC<ChatProps> = ({
                       </div>
                     )}
                     <div className="chat-message-time">
-                      {new Date(message.created_at).toLocaleTimeString(language === 'zh_CN' ? 'zh-CN' : 'en-US', {
+                      {new Date(message.created_at).toLocaleTimeString(i18n.language === 'zh_CN' ? 'zh-CN' : 'en-US', {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}
@@ -1165,8 +945,24 @@ const Chat: React.FC<ChatProps> = ({
                 </div>
               ))}
               
-              {/* 加载状态显示 */}
-              {isAnyLoading && (
+              {/* SSE 流式响应显示 */}
+              {isStreaming && streamingContent && (
+                <div className="chat-message chat-message--assistant">
+                  <div className="chat-message-avatar">
+                    <img
+                      src="/iCU_Icon.png"
+                      alt="iCU助手"
+                      className="chat-message-avatar-image"
+                    />
+                  </div>
+                  <div className="chat-message-content">
+                    <div className="chat-message-text"><MarkdownRenderer content={streamingContent} /></div>
+                  </div>
+                </div>
+              )}
+              
+              {/* 加载状态显示 (waiting for first chunk or non-stream loading) */}
+              {isAnyLoading && !streamingContent && (
                 <div className="chat-message chat-message--assistant">
                   <div className="chat-message-avatar">
                     <img
@@ -1206,7 +1002,7 @@ const Chat: React.FC<ChatProps> = ({
                   <path d="21 21l-4.35-4.35"></path>
                   <circle cx="11" cy="11" r="3" fill="currentColor"></circle>
                 </svg>
-                <span>{t.deepSearch}</span>
+                <span>{t('chat.deepSearch')}</span>
               </div>
             </div>
           )}
@@ -1245,7 +1041,7 @@ const Chat: React.FC<ChatProps> = ({
                       <button 
                         className="chat-uploaded-file-remove"
                         onClick={() => handleRemoveFile(file.id)}
-                        title={t.removeFile}
+                        title={t('chat.removeFile')}
                       >
                         ✕
                       </button>
@@ -1306,7 +1102,7 @@ const Chat: React.FC<ChatProps> = ({
                       onClick={handleAttachClick}
                     >
                       <span className="plus-menu-icon">📎</span>
-                      <span className="plus-menu-text">{t.uploadFile}</span>
+                      <span className="plus-menu-text">{t('chat.uploadFile')}</span>
                     </div>
                     <div 
                       className={`plus-menu-item ${searchEnabled ? 'active' : ''}`}
@@ -1314,7 +1110,7 @@ const Chat: React.FC<ChatProps> = ({
                     >
                       <span className="plus-menu-icon">🔍</span>
                       <span className="plus-menu-text">
-                        {searchEnabled ? '关闭深度搜索' : t.deepSearch}
+                        {searchEnabled ? t('chat.closeDeepSearch') : t('chat.deepSearch')}
                       </span>
                       {searchEnabled && (
                         <span className="plus-menu-status">✓</span>
@@ -1327,7 +1123,7 @@ const Chat: React.FC<ChatProps> = ({
               <textarea
                 ref={textareaRef}
                 className="chat-input"
-                placeholder={isCreatingChat ? '正在创建聊天...' : t.inputPlaceholder}
+                placeholder={isCreatingChat ? t('chat.creatingChat') : t('chat.inputPlaceholder')}
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
@@ -1341,7 +1137,7 @@ const Chat: React.FC<ChatProps> = ({
                 className="chat-random-button"
                 onClick={handleRandomClick}
                 disabled={isAnyLoading}
-                title={language === 'zh_CN' ? '随机填入一个问题' : 'Fill in a random question'}
+                title={t('chat.randomQuestion')}
               >
                 <svg 
                   width="20" 
@@ -1390,7 +1186,7 @@ const Chat: React.FC<ChatProps> = ({
           <div className="chat-drag-overlay">
             <div className="chat-drag-content">
               <div className="chat-drag-icon">📁</div>
-              <div className="chat-drag-text">{t.dropFileHint}</div>
+              <div className="chat-drag-text">{t('chat.dropFileHint')}</div>
             </div>
           </div>
         )}
@@ -1400,7 +1196,7 @@ const Chat: React.FC<ChatProps> = ({
           <div className="chat-upload-modal">
             <div className="chat-upload-modal-content">
               <div className="chat-upload-modal-header">
-                <h3>{t.addFile}</h3>
+                <h3>{t('chat.addFile')}</h3>
                 <button 
                   className="chat-upload-modal-close"
                   onClick={handleCancelUpload}
@@ -1425,13 +1221,13 @@ const Chat: React.FC<ChatProps> = ({
                   className="chat-upload-cancel-button"
                   onClick={handleCancelUpload}
                 >
-                  {t.cancel}
+                  {t('chat.cancel')}
                 </button>
                 <button 
                   className="chat-upload-confirm-button"
                   onClick={handleConfirmUpload}
                 >
-                  {t.addToChat}
+                  {t('chat.addToChat')}
                 </button>
               </div>
             </div>
@@ -1470,15 +1266,15 @@ const Chat: React.FC<ChatProps> = ({
         <div className="confirm-dialog-overlay">
           <div className="confirm-dialog">
             <div className="confirm-dialog-content">
-              <h3>{t.createNewChatWithModel}</h3>
+              <h3>{t('chat.createNewChatWithModel')}</h3>
               <p>当前模型: {initialModel} → 新模型: {pendingModel}</p>
             </div>
             <div className="confirm-dialog-actions">
               <button onClick={cancelConfirm} className="cancel-btn">
-                {t.cancelAction}
+                {t('chat.cancelAction')}
               </button>
               <button onClick={confirmModelChange} className="confirm-btn">
-                {t.confirm}
+                {t('chat.confirm')}
               </button>
             </div>
           </div>
@@ -1491,7 +1287,7 @@ const Chat: React.FC<ChatProps> = ({
           <div className="confirm-dialog">
             <div className="confirm-dialog-content">
               <h3>
-                {pendingSearch ? t.createNewChatWithSearch : t.createNewChatWithoutSearch}
+                {pendingSearch ? t('chat.createNewChatWithSearch') : t('chat.createNewChatWithoutSearch')}
               </h3>
               <p>
                 当前设置: {initialSearchEnabled ? '已开启' : '已关闭'} → 
@@ -1500,10 +1296,10 @@ const Chat: React.FC<ChatProps> = ({
             </div>
             <div className="confirm-dialog-actions">
               <button onClick={cancelConfirm} className="cancel-btn">
-                {t.cancelAction}
+                {t('chat.cancelAction')}
               </button>
               <button onClick={confirmSearchChange} className="confirm-btn">
-                {t.confirm}
+                {t('chat.confirm')}
               </button>
             </div>
           </div>

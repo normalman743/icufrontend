@@ -286,6 +286,22 @@ export interface CourseFoldersResponse {
   folders: Folder[];
 }
 
+// 课程资源批量响应（一个请求获取所有文件夹及其文件）
+export interface FolderWithFiles {
+  id: number;
+  name: string;
+  folder_type: string;
+  course_id: number;
+  is_default: boolean;
+  created_at: string;
+  stats: { file_count: number };
+  files: ApiFile[];
+}
+
+export interface CourseResourcesResponse {
+  folders: FolderWithFiles[];
+}
+
 // 课程列表响应
 export interface CourseListResponse {
   courses: Course[];

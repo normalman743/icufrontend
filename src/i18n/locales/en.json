@@ -1,0 +1,359 @@
+{
+  "chat": {
+    "mainGreeting": "I See U! I'm Intelligent CU, your AI learning assistant",
+    "randomGreetings": [
+      "Ready to start your learning journey?",
+      "How can I help you today?",
+      "Let's explore the ocean of knowledge together",
+      "What would you like to learn today?",
+      "I'm here to help you anytime"
+    ],
+    "messageSuggestions": [
+      "What's the weather like in Hong Kong this week?",
+      "Is CSCI3100 a difficult course?",
+      "Where is the NA Gym? What are the opening hours?",
+      "What are the recent breakthroughs in deep learning?",
+      "Compare CSCI3100 and CSCI3160 — which should I take?",
+      "How to plan the course selection path for CS major?",
+      "Write a quicksort algorithm in Python",
+      "My C++ assignment has compile errors, can you help?",
+      "What programming languages are mainly used in CUHK CSCI courses?"
+    ],
+    "inputPlaceholder": "How can I help you?",
+    "uploadFile": "Upload file",
+    "removeFile": "Remove file",
+    "addFile": "Add file",
+    "cancel": "Cancel",
+    "addToChat": "Add to chat",
+    "dropFileHint": "Drop file to upload",
+    "sources": "Sources",
+    "fileSize": "Size",
+    "fileName": "File name",
+    "deepSearch": "Deep Search",
+    "deepSearchTooltip": "Enable knowledge base deep search",
+    "modelSwitchConfirm": "Switching model requires creating a new conversation. Continue?",
+    "searchToggleConfirm": "Changing search settings requires creating a new conversation. Continue?",
+    "createNewChatWithModel": "Create a new conversation with this model?",
+    "createNewChatWithSearch": "Create a new conversation with deep search enabled?",
+    "createNewChatWithoutSearch": "Create a new conversation with deep search disabled?",
+    "confirm": "Confirm",
+    "cancelAction": "Cancel",
+    "randomQuestion": "Fill in a random question",
+    "creatingChat": "Creating chat...",
+    "closeDeepSearch": "Close Deep Search"
+  },
+  "courseChat": {
+    "backToCourses": "← Back to courses",
+    "aiAssistantOnline": "AI Assistant Online",
+    "ragPanel": "RAG",
+    "expandRagPanel": "Expand RAG panel",
+    "collapseRagPanel": "Collapse RAG panel",
+    "selectFilesForRag": "Select course files to enable RAG retrieval",
+    "manageRagFiles": "Manage RAG files",
+    "ragEnabled": "RAG retrieval enabled",
+    "selectedFiles": "Selected",
+    "filesCount": "files",
+    "clickRagBadge": "Click RAG badge to manage files",
+    "selectCourseFiles": "Select course files to enable RAG retrieval",
+    "clearSelection": "Clear selection",
+    "noFiles": "No files available",
+    "courseAIAssistant": "Course AI Assistant",
+    "enableRagSearch": "🔍 Enable RAG-enhanced Q&A",
+    "sendMessage": "Send message",
+    "bytes": "bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "welcomeGreetings": [
+      "Welcome to the \"{{courseName}}\" Course AI Assistant!",
+      "Ready to start your \"{{courseName}}\" learning journey?",
+      "I'm your dedicated \"{{courseName}}\" learning assistant",
+      "Let's explore the world of \"{{courseName}}\" together",
+      "Feel free to ask me anything about \"{{courseName}}\""
+    ],
+    "aiResponsePrefix": "Based on the \"{{courseName}}\" course content, here's my answer:",
+    "ragResultsPrefix": "🔍 RAG Results — Based on the following course files:",
+    "inputPlaceholder": "Ask the \"{{courseName}}\" AI assistant...",
+    "invalidCourseName": "Invalid course name",
+    "sendMessageFailed": "Failed to send message",
+    "loadCourseFilesFailed": "Failed to load course files",
+    "newChat": "New Chat",
+    "createNewChat": "Create New Chat",
+    "newChatWelcome": "Welcome to a new conversation with the \"{{courseName}}\" AI assistant! Please enter your question.",
+    "modelStar": "Suitable for most tasks",
+    "modelStarPlus": "Premium long reasoning",
+    "modelStarCode": "Optimized for coding and practical tasks",
+    "loadingFiles": "Loading course files...",
+    "uploadFilesFirst": "Please upload files on the course page first",
+    "downloadFile": "Download file",
+    "selectFilesHint": "Click 📁 button to select course files and enable RAG enhanced Q&A",
+    "loadSessionError": "Failed to load session. Please send a message to start a conversation",
+    "createNewChatFailed": "Failed to create new chat, please try again",
+    "userAlt": "User",
+    "aiAssistantAlt": "AI Assistant"
+  },
+  "sidebar": {
+    "newChat": "New Chat",
+    "courseManagement": "Course Management",
+    "apiTest": "API Test",
+    "settings": "Settings",
+    "chatHistory": "Chat History",
+    "noChatHistory": "No chat history",
+    "loadMore": "Scroll to load more...",
+    "selectSemester": "Select Semester",
+    "otherSemesters": "Other Semesters",
+    "allSemesters": "All Semesters",
+    "online": "Online",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "semesterFormat": {
+      "t1": "T1",
+      "t2": "T2",
+      "other": "Other"
+    },
+    "renameChat": "Rename",
+    "deleteChat": "Delete",
+    "confirmDelete": "Are you sure you want to delete this conversation?",
+    "renamePlaceholder": "Enter new conversation title...",
+    "loading": "Loading...",
+    "loadError": "Failed to load",
+    "user": "User",
+    "admin": "Admin",
+    "unknownSemester": "Unknown Semester",
+    "adminPanel": "Admin Panel",
+    "creating": "Creating...",
+    "created": "Created!",
+    "loadingChatHistory": "Loading chat history...",
+    "loadingChatHistoryDesc": "Please wait, fetching your chat history",
+    "deleting": "Deleting...",
+    "userAvatar": "User Avatar",
+    "yesterday": "Yesterday",
+    "daysAgo": "{{days}} days ago",
+    "semesterCount": "{{count}} semesters"
+  },
+  "settings": {
+    "profile": "Profile",
+    "preferences": "Preferences",
+    "privacy": "Privacy & Security",
+    "about": "About",
+    "theme": "Theme",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "language": "Language",
+    "displayLanguage": "Display Language",
+    "simplifiedChinese": "简体中文",
+    "english": "English",
+    "profileTitle": "Profile",
+    "avatar": "Avatar",
+    "name": "Name",
+    "email": "Email",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "nameReadOnly": "Username cannot be changed",
+    "emailReadOnly": "Email address is managed by the system",
+    "preferencesTitle": "Preferences",
+    "appearanceSettings": "Appearance",
+    "languageSettings": "Language",
+    "privacyTitle": "Privacy & Security",
+    "passwordSecurity": "Password Security",
+    "changePassword": "Change Password",
+    "dataManagement": "Data Management",
+    "logout": "Logout",
+    "passwordChangeDisabled": "Password change is currently unavailable",
+    "passwordManagedBySystem": "Password is managed by the system administrator",
+    "aboutTitle": "About iCU",
+    "appName": "iCU Intelligent Learning Assistant",
+    "version": "Version {{version}}",
+    "appDescription": "iCU is an intelligent learning assistant designed to provide students with personalized learning experiences and smart Q&A services.",
+    "systemInfo": "System Information",
+    "buildTime": "Build Time: ",
+    "techStack": "Tech Stack: ",
+    "registrationTime": "Registration: ",
+    "helpAndSupport": "Help & Support",
+    "userManual": "User Manual",
+    "contactSupport": "Contact Support",
+    "reportIssue": "Report Issue",
+    "buildTimeValue": "2025-6-18",
+    "techStackValue": "React + TypeScript",
+    "loggingOut": "Logging out..."
+  },
+  "userManual": {
+    "title": "User Manual",
+    "navItems": {
+      "userManual": "📖 User Manual",
+      "contactSupport": "📧 Contact Support",
+      "reportIssue": "🐛 Report Issue"
+    },
+    "quickStart": {
+      "title": "User Manual",
+      "subtitle1": "1. Quick Start",
+      "tableHeaders": {
+        "step": "Step",
+        "operation": "Operation",
+        "description": "Description"
+      },
+      "steps": [
+        {
+          "step": "① Open iCU",
+          "operation": "Visit https://icu.cuhk.edu.hk (Campus network recommended)",
+          "description": "Recommended browsers: Chrome/Edge/Firefox latest version"
+        },
+        {
+          "step": "② Register / Login",
+          "operation": "Register with CUHK unified identity or invitation code. New users need student ID, email, and invite code",
+          "description": "After login, the system auto-generates a JWT Token to maintain session"
+        },
+        {
+          "step": "③ Create Chat",
+          "operation": "Click the \"New Chat\" button in the sidebar",
+          "description": "Ask any learning-related question. Regular chat does not support RAG; for RAG, go to Course Management and create a \"Course Chat\""
+        },
+        {
+          "step": "④ Upload Files",
+          "operation": "In the Course Chat window, click 📎 or drag & drop files (for RAG retrieval)",
+          "description": "Supports PDF, Word, images, plain text, etc."
+        },
+        {
+          "step": "⑤ View Courses",
+          "operation": "Select \"Course Management\" in the sidebar",
+          "description": "View/create courses by semester, upload lecture notes and assignments"
+        },
+        {
+          "step": "⑥ Personalize",
+          "operation": "Go to Settings → Preferences",
+          "description": "Supports light/dark theme, language switching, and notification preferences"
+        }
+      ],
+      "subtitle2": "2. Feature Details",
+      "features": {
+        "smartChat": {
+          "title": "Smart Chat",
+          "items": [
+            "Supports real-time streaming responses. RAG (Retrieval-Augmented Generation) is only available in Course Chat, with citation sources shown below answers; regular chat does not support RAG.",
+            "Press ⌘/Ctrl + Enter in the input box to send quickly.",
+            "Use ↑/↓ to browse and re-edit previous questions."
+          ]
+        },
+        "courseManagement": {
+          "title": "Course Management",
+          "items": [
+            "Courses are grouped by academic year/semester. Upload syllabi, lectures, assignments, etc.",
+            "Each course has its own dedicated \"Course Chat\" focused on course content.",
+            "Deleting a course also removes its files and chat history. Please proceed with caution."
+          ]
+        },
+        "fileCenter": {
+          "title": "File Center",
+          "items": [
+            "Global file browser with filtering by upload time, course, or tags.",
+            "Images and PDFs have embedded preview; other formats can be downloaded."
+          ]
+        },
+        "billing": {
+          "title": "Balance & Billing",
+          "items": [
+            "View current balance and spending history in Settings → Account.",
+            "Unit: Token. Approximately 0.002 USD per 1,000 tokens (example).",
+            "Supports campus payment or credit card top-up."
+          ]
+        }
+      },
+      "subtitle3": "3. Frequently Asked Questions (FAQ)",
+      "faq": [
+        {
+          "question": "Why did my PDF upload fail to parse?",
+          "answer": "Please check the file is under 40 MB and not encrypted. If it still fails, submit via \"Report Issue\" with the file attached."
+        },
+        {
+          "question": "Can multiple people share the same course?",
+          "answer": "Yes. Add their CUHK email in Course → Member Management to share course files and chats."
+        },
+        {
+          "question": "How do I export chat history?",
+          "answer": "In the chat window, click the … menu at the top-right and select Export Markdown/PDF."
+        },
+        {
+          "question": "How do I reset my password?",
+          "answer": "Click \"Forgot Password\" on the login page. A reset email will be sent to your CUHK email."
+        }
+      ]
+    },
+    "contact": {
+      "title": "Contact Support",
+      "emailLabel": "Email: "
+    },
+    "report": {
+      "title": "Report Issue",
+      "subtitle1": "1. Best Practices for Submitting Bugs",
+      "bestPractices": [
+        "Go to Settings → Report Issue → Click \"Create Ticket\".",
+        "Fill in the form:",
+        "After submitting, you will receive a ticket number (#INC-xxxx).",
+        "You can track progress and developer replies in \"My Tickets\"."
+      ],
+      "formDetails": [
+        "Title: Summarize the issue in one sentence, e.g., \"PDF upload stuck at 99%\".",
+        "Description: Detailed steps (reproduction path), expected result, actual result.",
+        "Environment: OS, browser version / mobile device model.",
+        "Attachments: Screenshots / screen recordings / problematic files."
+      ],
+      "subtitle2": "2. Issue Categories",
+      "categoryHeader": "Category",
+      "exampleHeader": "Example",
+      "categories": [
+        { "type": "Feature Failure", "example": "Chat won't load, file preview broken" },
+        { "type": "Performance Issue", "example": "Page noticeably sluggish, slow responses" },
+        { "type": "Compatibility Issue", "example": "Input box loses focus on Safari 14" },
+        { "type": "Security Issue", "example": "XSS, unauthorized access" },
+        { "type": "Suggestion / New Feature", "example": "Add LaTeX rendering, support batch export" }
+      ],
+      "subtitle3": "3. SLA (Service Level Agreement)",
+      "slaHeaders": {
+        "level": "Severity",
+        "description": "Description",
+        "response": "First Response",
+        "target": "Target Fix"
+      },
+      "slaData": [
+        {
+          "level": "P0 Critical",
+          "description": "Affects all users' core functions (login/chat down)",
+          "response": "2 hours",
+          "target": "Hotfix within 24 hours"
+        },
+        {
+          "level": "P1 High",
+          "description": "Affects some users or important features",
+          "response": "4 hours",
+          "target": "3 business days"
+        },
+        {
+          "level": "P2 Medium",
+          "description": "General bugs or UI issues",
+          "response": "1 business day",
+          "target": "Next iteration"
+        },
+        {
+          "level": "P3 Low",
+          "description": "Copy/styling issues, or feature suggestions",
+          "response": "2 business days",
+          "target": "Scheduled"
+        }
+      ],
+      "updateHistory": "Update History",
+      "updateHeaders": {
+        "version": "Version",
+        "date": "Date",
+        "description": "Description"
+      },
+      "updateData": [
+        {
+          "version": "v1.0",
+          "date": "2025-07-05",
+          "description": "Initial release — includes user manual, support, and issue reporting"
+        }
+      ]
+    }
+  }
+}
