@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 interface ChatPageProps {
   currentSession: ChatSession | null;
   currentSessionId: string | null;
-  onCreateNewSession: (firstMessage: string, fileTokens?: string[], model?: AIModel) => Promise<string>;
+  onCreateNewSession: (firstMessage: string, fileTokens?: string[], model?: AIModel, searchEnabled?: boolean) => Promise<string>;
   onAddMessage: (sessionId: string, message: ChatMessage) => Promise<void>;
   onCreateNewChat?: (model?: AIModel, searchEnabled?: boolean) => void; // 🔥 模型/搜索切换时创建新对话
   isSidebarCollapsed?: boolean;
@@ -72,31 +72,32 @@ const ChatPage: React.FC<ChatPageProps> = ({
       setLoadingStage(0);
     }
   }, [isChatLoading]);
-
-  // 处理文件上传回调
+  // 处理文件上传回调 (kept for backwards compat, no longer drives new-session flow)
   const handleFilesUploaded = (fileTokens: string[]) => {
-    console.log('ChatPage: 收到文件tokens:', fileTokens);
+    console.log('ChatPage: 收到文件tokens (备用):', fileTokens);
     setPendingFileTokens(fileTokens);
   };
 
   // 发送消息处理
-  const handleSendMessage = async (content: string, files?: globalThis.File[], model?: AIModel) => {
-    if (!content.trim() && (!files || files.length === 0) && pendingFileTokens.length === 0) return;
+  const handleSendMessage = async (content: string, files?: globalThis.File[], model?: AIModel, searchEnabled?: boolean, fileTokens?: string[]) => {
+    // 🔥 修复：优先使用直接传入的fileTokens，fallback到pendingFileTokens
+    const resolvedFileTokens = (fileTokens && fileTokens.length > 0) ? fileTokens : pendingFileTokens;
+
+    if (!content.trim() && (!files || files.length === 0) && resolvedFileTokens.length === 0) return;
 
     // 如果是新会话，显示创建聊天加载状态
     if (!currentSessionId) {
       setIsCreatingNewSession(true);
     } else {
       setIsLoading(true);
-    }
-
-    try {
+    }    try {
       if (!currentSessionId) {
         console.log('ChatPage: 创建新会话，消息:', content);
         console.log('ChatPage: 使用的AI模型:', model);
-        console.log('ChatPage: 使用的文件tokens:', pendingFileTokens);
+        console.log('ChatPage: 使用的文件tokens (resolved):', resolvedFileTokens);
         
-        const newSessionId = await onCreateNewSession(content.trim(), pendingFileTokens, model);
+        // 🔥 修复：传入resolvedFileTokens而非pendingFileTokens，避免异步竞态
+        const newSessionId = await onCreateNewSession(content.trim(), resolvedFileTokens, model, searchEnabled);
         console.log('新聊天创建成功，ID:', newSessionId);
         
         // 清空pending tokens

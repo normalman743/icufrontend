@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ChatMessage, AIModel } from '../types'; // 🔥 确保导入了 AIModel
 import { useAuth } from '../contexts/AuthContext';
 import { chatAPI, courseAPI, folderAPI, fileAPI, semesterAPI } from '../utils/api';
+import MessageRenderer from './MessageRenderer';
 import './CourseChat.css';
 import { createPortal } from 'react-dom';
 
@@ -138,6 +139,82 @@ const i18nTexts = {
   }
 };
 
+// ModelSelector 提取到组件外部，避免每次渲染重新挂载
+interface ModelSelectorProps {
+  selectedModel: AIModel;
+  showModelSelector: boolean;
+  userLanguage: string;
+  onModelChange: (model: AIModel) => void;
+  onToggle: () => void;
+}
+
+const ModelSelector: React.FC<ModelSelectorProps> = ({
+  selectedModel,
+  showModelSelector,
+  userLanguage,
+  onModelChange,
+  onToggle,
+}) => {
+  const models = [
+    {
+      id: AIModel.STAR,
+      name: 'Star',
+      icon: '⭐',
+      description: userLanguage === 'zh_CN' ? '适用于多数任务' : 'Suitable for most tasks',
+    },
+    {
+      id: AIModel.STAR_PLUS,
+      name: 'StarPlus',
+      icon: '🌟',
+      description: userLanguage === 'zh_CN' ? '顶级长推理' : 'Premium long reasoning',
+    },
+    {
+      id: AIModel.STAR_CODE,
+      name: 'StarCode',
+      icon: '💻',
+      description: userLanguage === 'zh_CN' ? '优化编程和现实任务' : 'Optimized for coding and practical tasks',
+    },
+  ];
+
+  return (
+    <div className="course-chat-model-selector">
+      <button className="course-chat-model-trigger" onClick={onToggle}>
+        <span className="course-chat-model-icon">
+          {models.find(m => m.id === selectedModel)?.icon}
+        </span>
+        <span className="course-chat-model-name">
+          {models.find(m => m.id === selectedModel)?.name}
+        </span>
+        <span className="course-chat-model-arrow">
+          {showModelSelector ? '▲' : '▼'}
+        </span>
+      </button>
+      {showModelSelector && (
+        <div className="course-chat-model-dropdown">
+          {models.map(model => (
+            <button
+              key={model.id}
+              className={`course-chat-model-option ${
+                selectedModel === model.id ? 'course-chat-model-option--active' : ''
+              }`}
+              onClick={() => onModelChange(model.id)}
+            >
+              <span className="course-chat-model-option-icon">{model.icon}</span>
+              <div className="course-chat-model-option-info">
+                <span className="course-chat-model-option-name">{model.name}</span>
+                <span className="course-chat-model-option-description">{model.description}</span>
+              </div>
+              {selectedModel === model.id && (
+                <span className="course-chat-model-option-check">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CourseChat: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -145,7 +222,7 @@ const CourseChat: React.FC = () => {
   // 🔥 修改：同时获取 courseId 和 courseName 参数
   const { courseId, courseName } = useParams<{ 
     courseId?: string; 
-    courseName?: string; 
+    courseName?: string;
   }>();
   
   // 🔥 修改：AI模型选择状态 - 使用与Chat一致的模型类型
@@ -176,8 +253,7 @@ const CourseChat: React.FC = () => {
   const [greeting, setGreeting] = useState('');
   const [courseFiles, setCourseFiles] = useState<CourseFile[]>([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  
-  // 🔥 新增：课程文件和文件夹状态
+    // 🔥 新增：课程文件和文件夹状态
   const [courseFolders, setCourseFolders] = useState<any[]>([]);
   const [allFiles, setAllFiles] = useState<any[]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
@@ -186,6 +262,9 @@ const CourseChat: React.FC = () => {
   const [semesters, setSemesters] = useState<any[]>([]);
   const [allCourses, setAllCourses] = useState<any[]>([]);
   const [loadingCourseData, setLoadingCourseData] = useState(false);
+
+  // 🔥 懒加载标志：防止重复加载文件
+  const filesLoadedRef = useRef(false);
   
   // 🔥 添加缺失的滚动相关状态
   const [scrollInfo, setScrollInfo] = useState({ top: 0, height: 0 });
@@ -197,82 +276,10 @@ const CourseChat: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  
-  // 获取用户语言设置
+    // 获取用户语言设置
   const userLanguage = user?.preferred_language || 'zh_CN';
   const t = i18nTexts[userLanguage] || i18nTexts['zh_CN'];
 
-  // 🔥 新增：模型选择器组件 - 移动到组件内部但在所有 hooks 声明之后
-  const ModelSelector: React.FC = () => {
-    const models = [
-      { 
-        id: AIModel.STAR, 
-        name: 'Star', 
-        icon: '⭐',
-        description: userLanguage === 'zh_CN' ? '适用于多数任务' : 'Suitable for most tasks'
-      },
-      { 
-        id: AIModel.STAR_PLUS, 
-        name: 'StarPlus', 
-        icon: '🌟',
-        description: userLanguage === 'zh_CN' ? '顶级长推理' : 'Premium long reasoning'
-      },
-      { 
-        id: AIModel.STAR_CODE, 
-        name: 'StarCode', 
-        icon: '💻',
-        description: userLanguage === 'zh_CN' ? '优化编程和现实任务' : 'Optimized for coding and practical tasks'
-      }
-    ];
-
-    const handleModelChange = (modelId: AIModel) => {
-      setSelectedModel(modelId);
-      setShowModelSelector(false);
-    };
-
-    return (
-      <div className="course-chat-model-selector">
-        <button 
-          className="course-chat-model-trigger"
-          onClick={() => setShowModelSelector(!showModelSelector)}
-        >
-          <span className="course-chat-model-icon">
-            {models.find(m => m.id === selectedModel)?.icon}
-          </span>
-          <span className="course-chat-model-name">
-            {models.find(m => m.id === selectedModel)?.name}
-          </span>
-          <span className="course-chat-model-arrow">
-            {showModelSelector ? '▲' : '▼'}
-          </span>
-        </button>
-        
-        {showModelSelector && (
-          <div className="course-chat-model-dropdown">
-            {models.map(model => (
-              <button
-                key={model.id}
-                className={`course-chat-model-option ${
-                  selectedModel === model.id ? 'course-chat-model-option--active' : ''
-                }`}
-                onClick={() => handleModelChange(model.id)}
-              >
-                <span className="course-chat-model-option-icon">{model.icon}</span>
-                <div className="course-chat-model-option-info">
-                  <span className="course-chat-model-option-name">{model.name}</span>
-                  <span className="course-chat-model-option-description">{model.description}</span>
-                </div>
-                {selectedModel === model.id && (
-                  <span className="course-chat-model-option-check">✓</span>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-  
   // 🔥 新增：缺失的工具函数
   const handleBackToCourses = () => {
     navigate('/courses');
@@ -305,7 +312,6 @@ const CourseChat: React.FC = () => {
         return '📄';
     }
   };
-
   // 🔥 新增：新建聊天功能 - 添加在工具函数之后
   const handleCreateNewChat = async () => {
     try {
@@ -315,6 +321,9 @@ const CourseChat: React.FC = () => {
       setMessages([]);
       setCurrentChatId(null);
       setInputValue('');
+      setSelectedFiles([]);      // 清空已选文件，避免状态残留
+      setShowFileSelector(false);
+      setIsRagPanelExpanded(false);
       
       // 显示欢迎消息
       const welcomeMessage: ChatMessage = {
@@ -343,12 +352,16 @@ const CourseChat: React.FC = () => {
       alert(errorText);
     }
   };
-
   // 切换 RAG 面板展开/收起
   const toggleRagPanel = () => {
-    setIsRagPanelExpanded(!isRagPanelExpanded);
-    if (!isRagPanelExpanded) {
+    const willExpand = !isRagPanelExpanded;
+    setIsRagPanelExpanded(willExpand);
+    if (willExpand) {
       setShowFileSelector(true); // 展开时显示文件选择器
+      // 🔥 懒加载：打开 RAG 面板时才加载文件列表
+      if (!filesLoadedRef.current) {
+        loadCourseFiles().then(files => setCourseFiles(files));
+      }
     } else {
       setShowFileSelector(false); // 收起时隐藏文件选择器
     }
@@ -391,60 +404,60 @@ const CourseChat: React.FC = () => {
             console.log(`❌ 字段 ${field}:`, course[field]);
           }
         });
-        
-        // 🔥 修复：更智能的课程名称选择逻辑
+          // 🔥 修复：更智能的课程名称选择逻辑
         const courseIdNumber = course.id || parseInt(courseId);
         
         // 优先选择有意义的名称字段，避免选择代码或ID
-        let courseName = '';
+        // 注意：使用 resolvedCourseName 避免遮蔽 useParams 的 courseName
+        let resolvedCourseName = '';
         
         // 第一优先级：明确的名称字段
         if (course.name && course.name !== '' && course.name !== courseIdNumber.toString()) {
-          courseName = course.name;
-          console.log('✅ 使用 course.name:', courseName);
+          resolvedCourseName = course.name;
+          console.log('✅ 使用 course.name:', resolvedCourseName);
         } 
         // 第二优先级：course_name
         else if (course.course_name && course.course_name !== '' && course.course_name !== courseIdNumber.toString()) {
-          courseName = course.course_name;
-          console.log('✅ 使用 course.course_name:', courseName);
+          resolvedCourseName = course.course_name;
+          console.log('✅ 使用 course.course_name:', resolvedCourseName);
         }
         // 第三优先级：title
         else if (course.title && course.title !== '' && course.title !== courseIdNumber.toString()) {
-          courseName = course.title;
-          console.log('✅ 使用 course.title:', courseName);
+          resolvedCourseName = course.title;
+          console.log('✅ 使用 course.title:', resolvedCourseName);
         }
         // 第四优先级：subject 或 subject_name
         else if (course.subject && course.subject !== '' && course.subject !== courseIdNumber.toString()) {
-          courseName = course.subject;
-          console.log('✅ 使用 course.subject:', courseName);
+          resolvedCourseName = course.subject;
+          console.log('✅ 使用 course.subject:', resolvedCourseName);
         }
         else if (course.subject_name && course.subject_name !== '' && course.subject_name !== courseIdNumber.toString()) {
-          courseName = course.subject_name;
-          console.log('✅ 使用 course.subject_name:', courseName);
+          resolvedCourseName = course.subject_name;
+          console.log('✅ 使用 course.subject_name:', resolvedCourseName);
         }
         // 最后选择：代码字段（如果不是纯数字）
         else if (course.code && course.code !== '' && isNaN(Number(course.code))) {
-          courseName = course.code;
-          console.log('✅ 使用 course.code:', courseName);
+          resolvedCourseName = course.code;
+          console.log('✅ 使用 course.code:', resolvedCourseName);
         }
         // 默认值
         else {
-          courseName = `课程 ${courseIdNumber}`;
-          console.log('⚠️ 使用默认名称:', courseName);
+          resolvedCourseName = `课程 ${courseIdNumber}`;
+          console.log('⚠️ 使用默认名称:', resolvedCourseName);
         }
       
-        console.log('🔍 最终课程名称选择:', `"${courseName}"`);
+        console.log('🔍 最终课程名称选择:', `"${resolvedCourseName}"`);
         
         setCourseInfo({
-          id: courseIdNumber, // 🔥 确保ID是数字
-          name: courseName,
+          id: courseIdNumber,
+          name: resolvedCourseName,
           code: course.code,
           description: course.description
         });
         
         console.log('✅ 课程信息设置完成:', {
           id: courseIdNumber,
-          name: courseName,
+          name: resolvedCourseName,
           code: course.code,
           originalResponse: apiResponse
         });
@@ -504,50 +517,45 @@ const CourseChat: React.FC = () => {
     const currentCourseName = getCurrentCourseName();
     return t.inputPlaceholder.replace('{courseName}', currentCourseName);
   };
-
-  // 🔥 修改：从真实API获取课程文件数据
+  // 🔥 优化：从真实API并发获取课程文件数据（懒加载，按需调用）
   const loadCourseFiles = async () => {
     if (!courseInfo?.id) {
       console.log('没有课程ID，跳过文件加载。courseInfo:', courseInfo);
       return [];
     }
 
+    // 防止重复加载
+    if (filesLoadedRef.current) {
+      console.log('文件已加载过，跳过重复请求');
+      return courseFiles;
+    }
+
     setLoadingResources(true);
     try {
-      console.log('=== 开始加载课程资源 ===');
+      console.log('=== 开始懒加载课程文件 ===');
       console.log('课程ID:', courseInfo.id);
 
-      // 1. 获取课程文件夹
-      const foldersResponse = await folderAPI.getCourseFolders(courseInfo.id);
-      console.log('课程文件夹:', foldersResponse.folders);
-      setCourseFolders(foldersResponse.folders);
-
-      // 2. 获取所有文件（用于备选）
-      try {
-        const filesResponse = await fileAPI.getFiles();
-        console.log('所有文件:', filesResponse.files);
-        
-        // 过滤出属于当前课程的文件
-        const courseFiles = filesResponse.files.filter(file => 
-          file.course_id === courseInfo.id
-        );
-        setAllFiles(courseFiles);
-        console.log('当前课程文件:', courseFiles);
-      } catch (error) {
-        console.warn('获取文件列表失败:', error);
-        setAllFiles([]);
+      // 1. 获取课程文件夹（如果还没加载）
+      let folders = courseFolders;
+      if (folders.length === 0) {
+        const foldersResponse = await folderAPI.getCourseFolders(courseInfo.id);
+        folders = foldersResponse.folders;
+        setCourseFolders(folders);
       }
 
-      // 3. 构建文件列表用于界面显示
-      const files: CourseFile[] = [];
+      // 2. 并发获取所有文件夹的文件（Promise.all 代替串行 for...of）
+      const folderFileResults = await Promise.allSettled(
+        folders.map(folder => folderAPI.getFolderFiles(folder.id))
+      );
 
-      // 从文件夹中加载文件
-      for (const folder of foldersResponse.folders) {
-        try {
-          const folderFilesResponse = await folderAPI.getFolderFiles(folder.id);
-          console.log(`文件夹 ${folder.name} 的文件:`, folderFilesResponse.files);
-          
-          folderFilesResponse.files.forEach(file => {
+      const files: CourseFile[] = [];
+      const allFlatFiles: any[] = [];
+
+      folderFileResults.forEach((result, index) => {
+        const folder = folders[index];
+        if (result.status === 'fulfilled') {
+          result.value.files.forEach(file => {
+            allFlatFiles.push(file);
             files.push({
               id: file.id.toString(),
               name: file.original_name,
@@ -559,15 +567,15 @@ const CourseChat: React.FC = () => {
               folderType: folder.folder_type
             });
           });
-        } catch (error) {
-          console.warn(`获取文件夹 ${folder.name} 文件失败:`, error);
+        } else {
+          console.warn(`获取文件夹 ${folder.name} 文件失败:`, result.reason);
         }
-      }
+      });
 
-      console.log('=== 课程资源加载完成 ===');
-      console.log('文件夹数量:', foldersResponse.folders.length);
-      console.log('文件数量:', files.length);
+      setAllFiles(allFlatFiles);
+      filesLoadedRef.current = true;
 
+      console.log(`=== 课程文件加载完成: ${files.length} 个文件 ===`);
       return files;
     } catch (error) {
       console.error('加载课程资源失败:', error);
@@ -719,16 +727,19 @@ const CourseChat: React.FC = () => {
       alert('下载文件失败');
     }
   };
-
   // 修改原有的切换文件选择器函数
   const toggleFileSelector = () => {
     if (selectedFiles.length > 0) {
       // 如果已有选择的文件，切换 RAG 面板
       toggleRagPanel();
     } else {
-      // 如果没有选择文件，直接显示文件选择器
-      setShowFileSelector(!showFileSelector);
-      setIsRagPanelExpanded(!showFileSelector);
+      // 如果没有选择文件，直接显示文件选择器并懒加载
+      const willShow = !showFileSelector;
+      setShowFileSelector(willShow);
+      setIsRagPanelExpanded(willShow);
+      if (willShow && !filesLoadedRef.current) {
+        loadCourseFiles().then(files => setCourseFiles(files));
+      }
     }
   };
 
@@ -802,24 +813,18 @@ const CourseChat: React.FC = () => {
 
     setMessages(prev => [...prev, userMessage]);
 
-    try {
-      let chatId = currentChatId;
+    try {      let chatId = currentChatId;
       
       // 如果没有当前聊天ID，创建新的课程聊天
       if (!chatId) {
         chatId = await createCourseChat(content);
       } else {
-        // 🔥 修改：检查是否选择了文件
-        if (selectedFiles.length === 0) {
-          throw new Error('请至少选择一个文件');
-        }
-
         // 发送消息到现有聊天
         const sendMessageData = {
           content: content,
-          ai_model: selectedModel, // 🔥 使用选择的模型：AIModel.STAR | AIModel.STAR_PLUS | AIModel.STAR_CODE
+          ai_model: selectedModel,
           search_enabled: true,
-          // 🔥 如果选择了文件，包含文件信息
+          // 如果选择了文件，包含文件信息
           ...(selectedFiles.length > 0 && {
             file_ids: selectedFiles.map(f => parseInt(f.id)).filter(id => !isNaN(id)),
             folder_ids: courseFolders.map(folder => folder.id).filter(id => id)
@@ -837,18 +842,10 @@ const CourseChat: React.FC = () => {
       }
     } catch (error) {
       console.error(t.sendMessageFailed, error);
-      
-      // 🔥 修改：针对不同错误显示不同信息
+        // 发送失败时，显示错误消息
       let errorText = t.sendMessageFailed;
       if (error instanceof Error) {
-        if (error.message.includes('请至少选择一个文件') || 
-            error.message.includes('Please select at least one file')) {
-          errorText = userLanguage === 'zh_CN' ? '请至少选择一个文件' : 'Please select at least one file';
-        } else if (error.message.includes('网络请求失败')) {
-          errorText = userLanguage === 'zh_CN' ? '请至少选择一个文件' : 'Please select at least one file';
-        } else {
-          errorText = `${t.sendMessageFailed}: ${error.message}`;
-        }
+        errorText = `${t.sendMessageFailed}: ${error.message}`;
       }
       
       // 发送失败时，显示错误消息
@@ -871,8 +868,7 @@ const CourseChat: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  // 🔥 修改：当课程信息加载完成后，加载课程文件和初始化聊天
+  // 🔥 修改：当课程信息加载完成后，只加载文件夹列表和聊天历史（文件懒加载）
   useEffect(() => {
     const initializeCourseData = async () => {
       if (!courseInfo || !courseInfo.id) {
@@ -880,14 +876,24 @@ const CourseChat: React.FC = () => {
         return;
       }
       
-      console.log('=== 初始化课程数据 ===');
-      console.log('课程信息完整:', courseInfo);
+      // 课程切换时重置文件加载标志
+      filesLoadedRef.current = false;
+      setCourseFiles([]);
+      setAllFiles([]);
+      setCourseFolders([]);
       
-      // 1. 加载课程文件
-      const files = await loadCourseFiles();
-      setCourseFiles(files);
+      console.log('=== 初始化课程数据（只加载文件夹列表）===');
+
+      // 1. 只加载文件夹列表（轻量，供 createCourseChat 使用）
+      try {
+        const foldersResponse = await folderAPI.getCourseFolders(courseInfo.id);
+        setCourseFolders(foldersResponse.folders);
+        console.log('文件夹列表已加载:', foldersResponse.folders.length, '个');
+      } catch (error) {
+        console.warn('加载文件夹列表失败:', error);
+      }
       
-      // 2. 尝试加载现有的课程聊天
+      // 2. 尝试加载现有的课程聊天（不加载文件，文件在打开 RAG 面板时再加载）
       try {
         const response = await chatAPI.getChats();
         
@@ -1114,9 +1120,17 @@ const CourseChat: React.FC = () => {
                 </span>
               </div>
             )}
-          </div>
-          {/* 🔥 修改：使用模型选择器组件替换原来的状态指示器 */}
-          <ModelSelector />
+          </div>          {/* 🔥 修改：使用模型选择器组件替换原来的状态指示器 */}
+          <ModelSelector
+            selectedModel={selectedModel}
+            showModelSelector={showModelSelector}
+            userLanguage={userLanguage}
+            onModelChange={(modelId) => {
+              setSelectedModel(modelId);
+              setShowModelSelector(false);
+            }}
+            onToggle={() => setShowModelSelector(!showModelSelector)}
+          />
         </div>
 
         {/* 文件选择器 - 添加展开/收起动画 */}
@@ -1250,9 +1264,10 @@ const CourseChat: React.FC = () => {
                         className="course-chat-message-avatar-bot"
                       />
                     )}
-                  </div>
-                  <div className="course-chat-message-content">
-                    <div className="course-chat-message-text">{message.content}</div>
+                  </div>                  <div className="course-chat-message-content">
+                    <div className="course-chat-message-text">
+                      <MessageRenderer content={message.content} role={message.role} />
+                    </div>
                     <div className="course-chat-message-time">
                       {new Date(message.created_at).toLocaleTimeString(userLanguage === 'zh_CN' ? 'zh-CN' : 'en-US', {
                         hour: '2-digit',

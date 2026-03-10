@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ChatSession, ChatMessage, AIModel } from '../types';
 import { chatAPI } from '../utils/api';
 import ModelSelector from './ModelSelector';
+import MessageRenderer from './MessageRenderer';
 import './Chat.css';
 import { createPortal } from 'react-dom';
 
@@ -17,7 +18,7 @@ interface UploadedFile {
 
 interface ChatProps {
   currentSession: ChatSession | null;
-  onSendMessage: (content: string, files?: File[], model?: AIModel, searchEnabled?: boolean) => void;
+  onSendMessage: (content: string, files?: File[], model?: AIModel, searchEnabled?: boolean, fileTokens?: string[]) => void;
   onCreateNewChat?: (model?: AIModel, searchEnabled?: boolean) => void; // 🔥 新增创建新对话回调
   isLoading?: boolean;
   isSidebarCollapsed?: boolean;
@@ -25,7 +26,7 @@ interface ChatProps {
   onMessageSent?: (message: ChatMessage) => void;
   onBatchMessagesLoaded?: (sessionId: string, messages: ChatMessage[]) => void; // 🔥 新增批量消息回调
   onError?: (error: string) => void;
-  onFilesUploaded?: (fileTokens: string[]) => void;
+  onFilesUploaded?: (fileTokens: string[]) => void; // kept for backwards compat, no longer used for new sessions
 }
 
 // 国际化文本
@@ -731,25 +732,19 @@ const Chat: React.FC<ChatProps> = ({
       try {
         setIsCreatingChat(true);
         setLoadingMessage('正在创建新聊天...');
-        
-        const fileTokens = uploadedFiles
+          const fileTokens = uploadedFiles
           .map(uf => uf.token)
           .filter(token => token && typeof token === 'string' && token.trim() !== '') as string[];
         
         console.log('=== 创建新聊天调试信息 ===');
         console.log('消息内容:', trimmedInput);
         console.log('选中的AI模型:', selectedModel);
-        console.log('深度搜索状态:', searchEnabled); // 🔥 添加搜索状态日志
+        console.log('深度搜索状态:', searchEnabled);
         console.log('临时文件token列表:', fileTokens);
         
-        if (fileTokens.length > 0 && onFilesUploaded) {
-          console.log('通知父组件文件tokens:', fileTokens);
-          onFilesUploaded(fileTokens);
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
-        
-        console.log('调用onSendMessage，传递消息、AI模型和搜索设置');
-        await onSendMessage(trimmedInput, undefined, selectedModel, searchEnabled); // 🔥 传递搜索设置
+        // 🔥 修复竞态条件：直接将fileTokens传入onSendMessage，不再通过回调+setTimeout
+        console.log('调用onSendMessage，传递消息、AI模型、搜索设置和文件tokens');
+        await onSendMessage(trimmedInput, undefined, selectedModel, searchEnabled, fileTokens);
         
         // 清空输入
         setInputValue('');
@@ -1058,7 +1053,7 @@ const Chat: React.FC<ChatProps> = ({
         onDrop={handleDrop}
       >
         {/* 🔥 新增：顶部模型选择器 */}
-        <div className="chat-header">
+        <div className="chat-model-header">
           <ModelSelector
             selectedModel={selectedModel}
             onModelChange={handleModelChange} // 🔥 使用新的处理函数
@@ -1128,9 +1123,10 @@ const Chat: React.FC<ChatProps> = ({
                         className="chat-message-avatar-image"
                       />
                     )}
-                  </div>
-                  <div className="chat-message-content">
-                    <div className="chat-message-text">{message.content}</div>
+                  </div>                  <div className="chat-message-content">
+                    <div className="chat-message-text">
+                      <MessageRenderer content={message.content} role={message.role} />
+                    </div>
                     {/* 显示RAG来源 */}
                     {message.rag_sources && message.rag_sources.length > 0 && (
                       <div className="chat-message-sources">

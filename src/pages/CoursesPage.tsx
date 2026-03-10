@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Course, CourseSection, CourseResource, ApiFile, Semester } from '../types';
 import { courseAPI, folderAPI, fileAPI, semesterAPI } from '../utils/api';
@@ -201,13 +201,19 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
     description: string;
   } | null>(null);
   const [selectedResource, setSelectedResource] = useState<string>('outline');
-  // 更新文件状态结构 - 每个文件夹独立的加载状态
+  // 文件状态结构 - 每个文件夹独立的加载状态
   const [courseFiles, setCourseFiles] = useState<{ 
     [courseId: string]: { 
       [sectionId: string]: FolderState 
     } 
   }>({});
-  
+  // 🔥 策略B缓存：记录哪些 tab 已经加载过，避免重复请求
+  const loadedTabsRef = useRef<Set<string>>(new Set());
+  // 🔥 记录正在加载中的 (courseId + tabId)，防止并发重复发请求
+  const loadingInProgressRef = useRef<Set<string>>(new Set());
+  // 🔥 缓存 courseId+folderType => folderId，上传时直接用，避免重复 getCourseFolders
+  const folderIdCacheRef = useRef<Map<string, number>>(new Map());
+
   // 新增表单弹窗状态
   const [showCourseForm, setShowCourseForm] = useState(false);
   const [courseFormData, setCourseFormData] = useState<CourseFormData>({
@@ -293,15 +299,18 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
     loadSemesters();
   }, []);
 
-  // 加载课程数据 - 根据选择的学期过滤
+  // 🔥 优化：只加载课程列表，不再预加载所有文件夹和文件
   useEffect(() => {
     const loadCourses = async () => {
-      setIsLoading(true);
+      setIsLoading(true);      // 学期切换时清空文件缓存，强制重新加载
+      setCourseFiles({});
+      loadedTabsRef.current = new Set();
+      loadingInProgressRef.current = new Set();
+      folderIdCacheRef.current = new Map();
       try {
         const response = await courseAPI.getCourses();
         let filteredCourses = response.courses || [];
         
-        // 根据选择的学期过滤课程
         if (selectedSemester !== 'all') {
           filteredCourses = filteredCourses.filter(course => 
             course.semester_id?.toString() === selectedSemester
@@ -316,17 +325,7 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
         });
         
         setCourses(sortedCourses);
-        
-        // 批量加载文件，避免重复请求
-        const courseIds = sortedCourses
-          .map(course => course.id?.toString())
-          .filter((id): id is string => !!id);
-        
-        // 并发加载但限制数量，避免过多请求
-        await Promise.allSettled(
-          courseIds.map(courseId => loadCourseFiles(courseId))
-        );
-        
+        // ✅ 不再在这里调用 loadCourseFiles，改为 tab 切换时懒加载
       } catch (error) {
         console.error(t.loadError + ':', error);
         setCourses([]);
@@ -336,105 +335,168 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
     };
 
     loadCourses();
-  }, [selectedSemester]); // 移除 t 依赖，避免不必要的重新加载
+  }, [selectedSemester]);
 
-  // 重构文件加载函数 - 支持增量加载
-  const loadCourseFiles = async (courseId: string) => {
-    try {
-      console.log(`开始加载课程 ${courseId} 的文件夹`);
-      
-      // 初始化所有文件夹的加载状态
-      setCourseFiles(prev => ({
-        ...prev,
-        [courseId]: courseResources.reduce((acc, resource) => ({
-          ...acc,
-          [resource.id]: { loading: true, error: null, files: [] }
-        }), {})
-      }));
-      
-      // 获取课程文件夹
-      const foldersResponse = await folderAPI.getCourseFolders(parseInt(courseId));
-      console.log(`课程 ${courseId} 文件夹:`, foldersResponse.folders);
-      
-      // 为每个文件夹独立加载文件
-      foldersResponse.folders.forEach(folder => {
-        loadFolderFiles(courseId, folder.folder_type, folder.id, folder.name);
+  // 🔥 懒加载：加载指定 tab 下所有课程的文件（带缓存）
+  const loadTabFiles = useCallback(async (tabId: string, courseList: Course[]) => {
+    const courseIds = courseList
+      .map(c => c.id?.toString())
+      .filter((id): id is string => !!id);
+
+    // 筛出需要加载的课程（未缓存 且 未正在加载）
+    const toLoad = courseIds.filter(courseId => {
+      const key = `${tabId}:${courseId}`;
+      return !loadedTabsRef.current.has(key) && !loadingInProgressRef.current.has(key);
+    });
+
+    if (toLoad.length === 0) return;
+
+    // 标记为加载中
+    toLoad.forEach(courseId => {
+      loadingInProgressRef.current.add(`${tabId}:${courseId}`);
+    });
+
+    // 显示 loading 状态
+    setCourseFiles(prev => {
+      const update = { ...prev };
+      toLoad.forEach(courseId => {
+        update[courseId] = {
+          ...update[courseId],
+          [tabId]: { loading: true, error: null, files: [] }
+        };
       });
-      
-      // 设置没有对应文件夹的资源类型为完成状态
-      const existingFolderTypes = new Set(foldersResponse.folders.map(f => f.folder_type));
-      courseResources.forEach(resource => {
-        if (!existingFolderTypes.has(resource.id)) {
+      return update;
+    });
+
+    // 并发加载（限制不超过5个并发，避免瞬时爆发）
+    const CONCURRENCY = 5;
+    for (let i = 0; i < toLoad.length; i += CONCURRENCY) {
+      const batch = toLoad.slice(i, i + CONCURRENCY);
+      await Promise.allSettled(batch.map(async (courseId) => {
+        const key = `${tabId}:${courseId}`;        try {
+          const foldersResponse = await folderAPI.getCourseFolders(parseInt(courseId));
+          const targetFolder = foldersResponse.folders.find(f => f.folder_type === tabId);
+
+          // 🔥 缓存所有 folderId，供上传时直接使用
+          foldersResponse.folders.forEach(f => {
+            folderIdCacheRef.current.set(`${courseId}:${f.folder_type}`, f.id);
+          });
+
+          if (targetFolder) {
+            const filesResponse = await folderAPI.getFolderFiles(targetFolder.id);
+            setCourseFiles(prev => ({
+              ...prev,
+              [courseId]: {
+                ...prev[courseId],
+                [tabId]: { loading: false, error: null, files: filesResponse.files || [] }
+              }
+            }));
+          } else {
+            setCourseFiles(prev => ({
+              ...prev,
+              [courseId]: {
+                ...prev[courseId],
+                [tabId]: { loading: false, error: null, files: [] }
+              }
+            }));
+          }
+          // 标记缓存命中
+          loadedTabsRef.current.add(key);
+        } catch (error) {
           setCourseFiles(prev => ({
             ...prev,
             [courseId]: {
               ...prev[courseId],
-              [resource.id]: { loading: false, error: null, files: [] }
+              [tabId]: {
+                loading: false,
+                error: error instanceof Error ? error.message : '加载失败',
+                files: []
+              }
             }
           }));
+        } finally {
+          loadingInProgressRef.current.delete(key);
         }
-      });
-      
-    } catch (error) {
-      console.error(`加载课程 ${courseId} 文件夹失败:`, error);
-      
-      // 设置所有文件夹为错误状态
-      setCourseFiles(prev => ({
-        ...prev,
-        [courseId]: courseResources.reduce((acc, resource) => ({
-          ...acc,
-          [resource.id]: { 
-            loading: false, 
-            error: error instanceof Error ? error.message : '加载失败', 
-            files: [] 
-          }
-        }), {})
       }));
     }
-  };
+  }, []);
 
-  // 新增：独立的文件夹文件加载函数
-  const loadFolderFiles = async (courseId: string, folderType: string, folderId: number, folderName: string) => {
+  // 🔥 课程列表加载完毕后，自动加载默认 tab（outline）的文件
+  useEffect(() => {
+    if (!isLoading && courses.length > 0 && selectedResource) {
+      loadTabFiles(selectedResource, courses);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, courses]);
+
+  // 重构文件加载函数 - 仍保留供「重试」和「新建课程后」使用
+  const loadCourseFiles = async (courseId: string) => {
+    // 清除该课程所有 tab 的缓存，强制重新加载
+    courseResources.forEach(r => {
+      loadedTabsRef.current.delete(`${r.id}:${courseId}`);
+    });
+
+    // 只重新加载当前 tab
+    const key = `${selectedResource}:${courseId}`;
+    if (loadingInProgressRef.current.has(key)) return;
+    loadingInProgressRef.current.add(key);
+
+    setCourseFiles(prev => ({
+      ...prev,
+      [courseId]: {
+        ...prev[courseId],
+        [selectedResource]: { loading: true, error: null, files: [] }
+      }
+    }));
+
     try {
-      console.log(`=== 加载文件夹 ${folderName} (ID: ${folderId}) 的文件 ===`);
-      
-      const filesResponse = await folderAPI.getFolderFiles(folderId);
-      console.log(`文件夹 ${folderName} API 响应:`, JSON.stringify(filesResponse, null, 2));
-      
-      // 立即更新该文件夹的状态
-      setCourseFiles(prev => ({
-        ...prev,
-        [courseId]: {
-          ...prev[courseId],
-          [folderType]: {
-            loading: false,
-            error: null,
-            files: filesResponse.files || []
+      const foldersResponse = await folderAPI.getCourseFolders(parseInt(courseId));
+      const targetFolder = foldersResponse.folders.find(f => f.folder_type === selectedResource);
+
+      if (targetFolder) {
+        const filesResponse = await folderAPI.getFolderFiles(targetFolder.id);
+        setCourseFiles(prev => ({
+          ...prev,
+          [courseId]: {
+            ...prev[courseId],
+            [selectedResource]: { loading: false, error: null, files: filesResponse.files || [] }
           }
-        }
-      }));
-      
-      console.log(`文件夹 ${folderName} (${folderType}) 文件加载完成: ${filesResponse.files?.length || 0} 个文件`);
-      
+        }));
+      } else {
+        setCourseFiles(prev => ({
+          ...prev,
+          [courseId]: {
+            ...prev[courseId],
+            [selectedResource]: { loading: false, error: null, files: [] }
+          }
+        }));
+      }
+      loadedTabsRef.current.add(key);
     } catch (error) {
-      console.warn(`加载文件夹 ${folderName} 文件失败:`, error);
-      
-      // 设置该文件夹的错误状态
       setCourseFiles(prev => ({
         ...prev,
         [courseId]: {
           ...prev[courseId],
-          [folderType]: {
+          [selectedResource]: {
             loading: false,
             error: error instanceof Error ? error.message : '加载失败',
             files: []
           }
         }
       }));
+    } finally {
+      loadingInProgressRef.current.delete(key);
     }
   };
+  // 获取特定课程和资源的文件夹状态（未加载时默认 loading=true，触发懒加载）
+  const getFolderState = (courseId: string, resourceId: string): FolderState => {
+    const existing = courseFiles[courseId]?.[resourceId];
+    if (existing) return existing;
+    // 尚未加载：显示 loading 占位，但不在此触发请求（由 loadTabFiles 统一管理）
+    return { loading: true, error: null, files: [] };
+  };
 
-  // 更新资源数量计算
+  // 统计某个资源 tab 下所有课程的文件总数
   const getResourceCount = (resourceId: string): number => {
     let totalCount = 0;
     Object.values(courseFiles).forEach(courseFile => {
@@ -444,11 +506,6 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
       }
     });
     return totalCount;
-  };
-
-  // 获取特定课程和资源的文件夹状态
-  const getFolderState = (courseId: string, resourceId: string): FolderState => {
-    return courseFiles[courseId]?.[resourceId] || { loading: true, error: null, files: [] };
   };
 
   // 文件上传处理 - 改善文件夹ID查找逻辑
@@ -471,29 +528,35 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
 
     try {
       console.log(`准备为课程 ${courseId} 的 ${sectionId} 区域上传文件`);
-      
-      let targetFolderId: number | undefined;
+        let targetFolderId: number | undefined;
       
       try {
-        const foldersResponse = await folderAPI.getCourseFolders(parseInt(courseId));
-        let targetFolder = foldersResponse.folders.find(folder => folder.folder_type === sectionId);
-        
-        if (!targetFolder) {
-          console.log(`未找到 ${sectionId} 类型的文件夹，尝试创建...`);
-          
-          const folderName = courseResources.find(r => r.id === sectionId)?.name || sectionId;
-          const createFolderResponse = await folderAPI.createFolder({
-            name: folderName,
-            folder_type: sectionId,
-            course_id: parseInt(courseId)
+        // 🔥 优先读 folderId 缓存，避免重复 getCourseFolders 请求
+        const cachedFolderId = folderIdCacheRef.current.get(`${courseId}:${sectionId}`);
+        if (cachedFolderId !== undefined) {
+          targetFolderId = cachedFolderId;
+        } else {
+          const foldersResponse = await folderAPI.getCourseFolders(parseInt(courseId));
+          // 顺带填充整个课程的 folderId 缓存
+          foldersResponse.folders.forEach(f => {
+            folderIdCacheRef.current.set(`${courseId}:${f.folder_type}`, f.id);
           });
+          let targetFolder = foldersResponse.folders.find(folder => folder.folder_type === sectionId);
           
-          targetFolder = createFolderResponse.folder;
-          console.log(`成功创建文件夹: ${folderName} (ID: ${targetFolder.id})`);
+          if (!targetFolder) {
+            console.log(`未找到 ${sectionId} 类型的文件夹，尝试创建...`);
+            const folderName = courseResources.find(r => r.id === sectionId)?.name || sectionId;
+            const createFolderResponse = await folderAPI.createFolder({
+              name: folderName,
+              folder_type: sectionId,
+              course_id: parseInt(courseId)
+            });
+            targetFolder = createFolderResponse.folder;
+            folderIdCacheRef.current.set(`${courseId}:${sectionId}`, targetFolder.id);
+            console.log(`成功创建文件夹: ${folderName} (ID: ${targetFolder.id})`);
+          }
+          targetFolderId = targetFolder?.id;
         }
-        
-        targetFolderId = targetFolder?.id;
-
       } catch (error) {
         console.warn('无法获取或创建文件夹，将上传到课程根目录:', error);
       }
@@ -893,10 +956,9 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
       handleCourseEditCancel();
     }
   };
-
-  // 课程聊天
-  const handleCourseChat = (courseName: string) => {
-    navigate(`/course-chat/${encodeURIComponent(courseName)}`);
+  // 课程聊天 - 统一使用课程ID导航
+  const handleCourseChat = (courseId: number) => {
+    navigate(`/course-chat/${courseId}`);
   };
 
   // 滑动功能
@@ -978,6 +1040,7 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
   // 处理资源选择
   const handleResourceSelect = (resourceId: string) => {
     setSelectedResource(resourceId);
+    loadTabFiles(resourceId, courses);
   };
 
   // 获取当前学期名称
@@ -1117,14 +1180,12 @@ const CoursesPage: React.FC<CoursesPageProps> = ({
                       </div>
                     )}
                   </div>
-                  
-                  <div className="course-chat-section">
+                    <div className="course-chat-section">
                     <button 
                       className="course-chat-btn"
                       onClick={() => {
-                        // 🔥 确保使用课程ID，并且课程ID存在
                         if (course.id) {
-                          navigate(`/course-chat/${course.id}`);
+                          handleCourseChat(course.id);
                         } else {
                           console.error('课程ID不存在:', course);
                           alert('无法启动课程聊天：课程ID缺失');
